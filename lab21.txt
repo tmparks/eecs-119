@@ -1,0 +1,4 @@
+Just some silly text an example of
+what your program is supposed to do.
+More:
+so you know what to do with it.
