@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 def reciprocal_sum(limit, bias=0):
-    """Compute the sum of reciprocals from 1..limit.
+    """
+    Compute the sum of reciprocals from 1..limit.
 
     An optional bias is applied before (and removed after)
     computing the sum in order to demonstrate the limited

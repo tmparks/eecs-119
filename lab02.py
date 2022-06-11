@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 def read_file(file_name):
-    """Read words from a file.
+    """
+    Read words from a file.
 
     A word is any sequence of non-blank characters.
     """
@@ -11,7 +12,8 @@ def read_file(file_name):
 
 
 def read_sequence(file_name):
-    """Read a sequence of integers from a file.
+    """
+    Read a sequence of integers from a file.
 
     The sequence in the file is preceded by an integer telling how many elements
     there are in the sequence.
@@ -40,6 +42,6 @@ def two_largest(numbers):
 two_largest(read_sequence('lab02.txt'))
 
 # Additional test cases.
-two_largest([1, 2, 3, 4, 5])
-two_largest([5, 4, 3, 2, 1])
-two_largest([1, 2, 3, 4, 5, 5, 4, 3, 2, 1])
+# two_largest([1, 2, 3, 4, 5])
+# two_largest([5, 4, 3, 2, 1])
+# two_largest([1, 2, 3, 4, 5, 5, 4, 3, 2, 1])
