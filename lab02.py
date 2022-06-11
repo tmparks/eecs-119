@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def read_file(file_name):
+def read_words(file_name):
     """
     Read words from a file.
 
@@ -18,7 +18,7 @@ def read_sequence(file_name):
     The sequence in the file is preceded by an integer telling how many elements
     there are in the sequence.
     """
-    words = read_file(file_name)  # generator
+    words = read_words(file_name)  # generator
     length = int(next(words))
     for _ in range(length):
         yield int(next(words))
