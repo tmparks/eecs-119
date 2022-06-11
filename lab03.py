@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def read_file(file_name):
+def read_words(file_name):
     """
     Read words from a file.
 
@@ -24,7 +24,7 @@ def print_words(file_name):
     A new line is started after any word that starts with r, s, or t.
     """
     line = []
-    for word in read_file(file_name):
+    for word in read_words(file_name):
         line.append(word)
         if (word.startswith(('r', 's', 't'))):
             print(' '.join(line))
