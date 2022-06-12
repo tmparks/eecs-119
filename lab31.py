@@ -13,12 +13,26 @@ def new_coyotes(old_rabbits, old_coyotes):
     return old_coyotes + births - starvation_deaths
 
 
+def small_change(old, new):
+    return old != 0.0 and abs((new - old) / old) < 0.01
+
+
+def update(old_rabbits, old_coyotes):
+    rabbits = new_rabbits(old_rabbits, old_coyotes)
+    coyotes = new_coyotes(old_rabbits, old_coyotes)
+    stop = (small_change(old_rabbits, rabbits)
+            and small_change(old_coyotes, coyotes))
+    return (stop, rabbits, coyotes)
+
+
 def left_pad(spaces, text):
     width = str(spaces + len(text))
     return format(text, '>' + width)
 
 
 def print_line(month, rabbits, coyotes):
+    if month % 3 != 0:
+        return
     rabbit_column = round(0.01 * rabbits)
     coyote_column = round(2 * coyotes)
     left = ''
@@ -39,17 +53,17 @@ rabbits = 10.0
 coyotes = 0.0
 
 for month in range(50):
-    if month % 3 == 0:
-        print_line(month, rabbits, coyotes)
-    (rabbits, coyotes) = (new_rabbits(rabbits, coyotes), new_coyotes(rabbits, coyotes))
+    print_line(month, rabbits, coyotes)
+    (stop, rabbits, coyotes) = update(rabbits, coyotes)
 
 # Ten coyotes are released 50 months after the first rabbits escaped
 coyotes += 10.0
 
 for month in range(50, 301):
-    if month % 3 == 0:
-        print_line(month, rabbits, coyotes)
-    (rabbits, coyotes) = (new_rabbits(rabbits, coyotes), new_coyotes(rabbits, coyotes))
+    print_line(month, rabbits, coyotes)
+    (stop, rabbits, coyotes) = update(rabbits, coyotes)
+    if stop:
+        break
 
 print('In month', month, 'there are', rabbits,
       'rabbits and', coyotes, 'coyotes')
