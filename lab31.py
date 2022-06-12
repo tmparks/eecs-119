@@ -13,15 +13,25 @@ def new_coyotes(old_rabbits, old_coyotes):
     return old_coyotes + births - starvation_deaths
 
 
+def left_pad(spaces, text):
+    width = str(spaces + len(text))
+    return format(text, '>' + width)
+
+
 def print_line(month, rabbits, coyotes):
-    r = round(0.01 * rabbits)
-    c = round(2 * coyotes)
-    if (r < c):
-        print(month, r, c)
-    elif (r > c):
-        print(month, c, r)
-    else:
-        print(month, r)
+    rabbit_column = round(0.01 * rabbits)
+    coyote_column = round(2 * coyotes)
+    left = ''
+    right = ''
+    if rabbit_column < coyote_column and rabbits > 0.0:
+        left = left_pad(rabbit_column, 'r')
+        right = left_pad(coyote_column - rabbit_column - 1, 'c')
+    elif coyote_column < rabbit_column and coyotes > 0.0:
+        left = left_pad(coyote_column, 'c')
+        right = left_pad(rabbit_column - coyote_column - 1, 'r')
+    elif rabbits > 0.0:
+        left = left_pad(rabbit_column, 'r')
+    print(format(month, '3') + '|' + left + right)
 
 
 # Ten rabbits escape in month 0
