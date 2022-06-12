@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
 def new_rabbits(old_rabbits, old_coyotes):
-    births = 0.2 * old_rabbits
-    starvation_deaths = 0.00002 * old_rabbits * old_rabbits
-    other_deaths = old_coyotes * old_rabbits * 45.0 / 10000.0
+    births = 2e-1 * old_rabbits
+    starvation_deaths = 2e-5 * old_rabbits * old_rabbits
+    other_deaths = old_coyotes * old_rabbits * 4.5e-3
     return old_rabbits + births - starvation_deaths - other_deaths
 
 
 def new_coyotes(old_rabbits, old_coyotes):
-    births = 0.08 * old_coyotes
-    starvation_deaths = old_coyotes * 250.0 / old_rabbits
+    births = 8e-2 * old_coyotes
+    starvation_deaths = old_coyotes * 2.5e2 / old_rabbits
     return old_coyotes + births - starvation_deaths
 
 
 def small_change(old, new):
-    return old != 0.0 and abs((new - old) / old) < 0.01
+    return old != 0.0 and abs((new - old) / old) < 1e-2
 
 
 def update(old_rabbits, old_coyotes):
@@ -33,8 +33,8 @@ def left_pad(spaces, text):
 def print_line(month, rabbits, coyotes):
     if month % 3 != 0:
         return
-    rabbit_column = round(0.01 * rabbits)
-    coyote_column = round(2 * coyotes)
+    rabbit_column = round(1e-2 * rabbits)
+    coyote_column = round(2.0 * coyotes)
     left = ''
     right = ''
     if rabbit_column < coyote_column and rabbits > 0.0:
@@ -52,18 +52,15 @@ def print_line(month, rabbits, coyotes):
 rabbits = 10.0
 coyotes = 0.0
 
-for month in range(50):
-    print_line(month, rabbits, coyotes)
-    (stop, rabbits, coyotes) = update(rabbits, coyotes)
-
-# Ten coyotes are released 50 months after the first rabbits escaped
-coyotes += 10.0
-
-for month in range(50, 301):
+for month in range(300):
+    if month == 50:
+        coyotes += 10.0  # Ten coyotes are released in month 50
     print_line(month, rabbits, coyotes)
     (stop, rabbits, coyotes) = update(rabbits, coyotes)
     if stop:
         break
 
-print('In month', month, 'there are', rabbits,
-      'rabbits and', coyotes, 'coyotes')
+print_line(month + 1, rabbits, coyotes)
+
+print('In month', month + 1, 'there are',
+      rabbits, 'rabbits and', coyotes, 'coyotes')
