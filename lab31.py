@@ -48,8 +48,7 @@ def print_line(month, rabbits, coyotes):
     print(format(month, '3') + '|' + left + right)
 
 
-# Ten rabbits escape in month 0
-rabbits = 10.0
+rabbits = 10.0 # Ten rabbits escape in month 0
 coyotes = 0.0
 
 for month in range(300):
@@ -59,8 +58,9 @@ for month in range(300):
     (stop, rabbits, coyotes) = update(rabbits, coyotes)
     if stop:
         break
+month += 1
 
-print_line(month + 1, rabbits, coyotes)
+print_line(month, rabbits, coyotes)
 
-print('In month', month + 1, 'there are',
+print('In month', month, 'there are',
       rabbits, 'rabbits and', coyotes, 'coyotes')
