@@ -1,0 +1,6 @@
+This line contains more than 40 characters
+but this    other   line      will       just  fit
+.XX  garbage
+in the second line.  .YY Here
+is
+additional   text
