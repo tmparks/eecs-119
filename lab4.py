@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 class TextFormatter:
-    width = 40    # line width
-    output = ''   # output line
-    first = True  # first paragraph
+    width = 40       # current line width
+    next_width = 40  # line width for next paragraph
+    output = ''      # output line
+    first = True     # first paragraph
 
     def print(self):
         if len(self.output) > 0:
@@ -15,6 +16,7 @@ class TextFormatter:
             self.print()
             print()  # blank line
         self.output = indent
+        self.width = self.next_width
 
     def command(self, line):
         if line.startswith('.PP'):  # new paragraph
@@ -22,9 +24,8 @@ class TextFormatter:
         elif line.startswith('.LP'):
             self.paragraph('')      # no indent
         elif line.startswith('.W'):
-            width = int(line.split()[-1])
-            assert 30 <= width and width <= 99
-            self.width = width
+            self.next_width = int(line.split()[-1])
+            assert 30 <= self.next_width and self.next_width <= 99
 
     def text(self, line):
         for word in line.split():
