@@ -1,0 +1,13 @@
+This paragraph is single spaced, but the next
+paragraph will be double spaced.
+.SP 1
+.PP
+The separation between two paragraphs
+should always be one more than the
+spacing between lines of the first
+paragraph of the pair.
+.SP 0
+.PP
+Single spacing should be assumed at the
+beginning unless otherwise specified before
+the first paragraph command in the file.

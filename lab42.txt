@@ -5,4 +5,4 @@ This paragraph doesn't     make much sense.
 .LP
 Here is
     a  paragraph which
-is not indented
+is not indented.
