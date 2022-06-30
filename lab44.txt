@@ -1,0 +1,12 @@
+.W 40
+.JST
+.PP
+With the ".JST" command, insert blanks between words in a line so that the last
+character of each line (except the last line of each paragraph)
+is a non-blank character. The blanks should be added in an intelligent
+way: if you select any two consecutive words of the output line,
+the number of blanks between them should not differ by more than one
+from the number of blanks between any other two consecutive words
+in the same line. Adding all the needed blanks between the last two
+words in the line is not a satisfactory solution.
+.NJST
