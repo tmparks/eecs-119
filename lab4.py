@@ -9,6 +9,7 @@ class TextFormatter:
     next_indent = ''      # indentation for next paragraph
     margin = ''           # current margin
     next_margin = ''      # margin for next paragraph
+    format = True         # current formatting state
     justify = False       # current justification state
     next_justify = False  # justification for the next paragraph
     output = ''           # output line
@@ -86,6 +87,11 @@ class TextFormatter:
             self.next_justify = True
         elif args[0] == '.NJST':
             self.next_justify = False
+        elif args[0] == '.NF':
+            self.print_line(False)  # last line is never justified
+            self.format = False
+        elif args[0] == '.FI':
+            self.format = True
 
     def text(self, line):
         length = (len(self.output)
@@ -102,7 +108,9 @@ class TextFormatter:
     def format(self, file_name):
         with open(file_name) as file:
             for line in file:
-                if line.startswith('.'):
+                if not self.format and not line.startswith('.FI'):
+                    print(line, end='')
+                elif line.startswith('.'):
                     self.command(line)
                 else:
                     self.text(line)
