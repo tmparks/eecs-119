@@ -30,16 +30,15 @@ def print_line(month, rabbits, coyotes):
         return
     rabbit_column = round(1e-2 * rabbits)
     coyote_column = round(2.0 * coyotes)
-    left = ''
-    right = ''
-    if rabbit_column < coyote_column and rabbits > 0.0:
+    if rabbit_column < coyote_column:
         left = 'r'.rjust(rabbit_column + 1)
         right = 'c'.rjust(coyote_column - rabbit_column)
-    elif coyote_column < rabbit_column and coyotes > 0.0:
+    elif coyote_column < rabbit_column:
         left = 'c'.rjust(coyote_column + 1)
         right = 'r'.rjust(rabbit_column - coyote_column)
-    elif rabbits > 0.0:
+    else:  # print only r when equal
         left = 'r'.rjust(rabbit_column + 1)
+        right = ''
     print(format(month, '3') + '|' + left + right)
 
 
