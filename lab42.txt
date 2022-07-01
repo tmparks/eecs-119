@@ -1,0 +1,9 @@
+.W 33
+.PP
+Here is a sample   paragraph which starts the file.
+This paragraph doesn't     make much sense.
+.LP
+Here is
+    a  paragraph which
+is not indented.
+.W 40

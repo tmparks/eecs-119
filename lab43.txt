@@ -1,0 +1,32 @@
+.PP
+Single spacing should be assumed at the
+beginning unless otherwise specified before
+the first paragraph command in the file.
+.SP 1
+.PP
+With the ".SP" command, the specified number
+of blank lines should be printed in between
+any two lines of output.
+The separation between two paragraphs
+should always be one more than the
+spacing between lines of the first
+paragraph of the pair.
+.SP 0
+.I 4
+.PP
+With the ".I" command, each line should start
+with the specified number of blanks.
+These blanks should be counted as characters
+printed in the line.
+The automatic indentation produced by the
+".PP" command should be added to the indentation
+produced by the ".I" command.
+.M 4
+.PP
+With the ".M" command, the first character of
+each line of output should be preceded by
+the specified number of blanks.
+These blanks should not be counted towards
+the line length established by the last ".W" command.
+.I 0
+.M 0

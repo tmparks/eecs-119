@@ -1,0 +1,19 @@
+.IP 11 <.IP NN <L>>
+With the ".IP" command, all lines of the new paragraph
+should be indented by the specified number of characters.
+The label is to be placed in the first line of the
+paragraph with its first character in the first
+output column.
+.I 0
+.LP
+With the ".NF" command, the formatter should print the
+input
+.NF
+  exactly
+          as
+             it
+                is
+                   read
+.FI
+starting in a new line and including blanks and line breaks
+until the command ".FI" is found.
