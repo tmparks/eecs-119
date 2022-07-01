@@ -48,36 +48,43 @@ class TextFormatter:
         self.justify = self.next_justify
         self.output = self.margin + self.indent + indent
 
-    def argument(self, line, min, max):
-        words = line.split()
-        assert len(words) == 2
-        result = int(words[-1])
-        assert min <= result and result <= max
-        return result
+    def spaces(self, width):
+        spaces = ''
+        if width > 0:
+            spaces = ' '.ljust(width)
+        return spaces
 
-    def spaces(self, line, min, max):
-        result = ''
-        n = self.argument(line, min, max)
-        if n > 0:
-            result = ' '.rjust(n)
-        return result
+    def label(self, width, words):
+        label = ' '.join(words)
+        if label.startswith('<'):
+            label = label[1:]
+        if label.endswith('>'):
+            label = label[:-1]
+        if len(label) >= width:
+            label += ' '
+        return label.ljust(width)
 
     def command(self, line):
-        if line.startswith('.PP'):   # new paragraph
+        args = line.split()
+        if args[0] == '.PP':         # new paragraph
             self.paragraph('     ')  # indent by 5
-        elif line.startswith('.LP'):
+        elif args[0] == '.LP':
             self.paragraph('')       # no indent
-        elif line.startswith('.W'):
-            self.next_width = self.argument(line, 30, 99)
-        elif line.startswith('.SP'):
-            self.next_space = self.argument(line, 0, 9)
-        elif line.startswith('.I'):
-            self.next_indent = self.spaces(line, 0, 99)
-        elif line.startswith('.M'):
-            self.next_margin = self.spaces(line, 0, 99)
-        elif line.startswith('.JST'):
+        elif args[0] == '.IP':
+            self.next_indent = self.spaces(int(args[1]))
+            self.paragraph('')       # no additional indent
+            self.output = self.margin + self.label(len(self.indent), args[2:])
+        elif args[0] == '.W':
+            self.next_width = int(args[1])
+        elif args[0] == '.SP':
+            self.next_space = int(args[1])
+        elif args[0] == '.I':
+            self.next_indent = self.spaces(int(args[1]))
+        elif args[0] == '.M':
+            self.next_margin = self.spaces(int(args[1]))
+        elif args[0] == '.JST':
             self.next_justify = True
-        elif line.startswith('.NJST'):
+        elif args[0] == '.NJST':
             self.next_justify = False
 
     def text(self, line):
@@ -108,3 +115,4 @@ f.format('lab41.txt')
 f.format('lab42.txt')
 f.format('lab43.txt')
 f.format('lab44.txt')
+f.format('lab45.txt')
