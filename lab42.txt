@@ -6,3 +6,4 @@ This paragraph doesn't     make much sense.
 Here is
     a  paragraph which
 is not indented.
+.W 40
