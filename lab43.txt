@@ -22,7 +22,7 @@ The automatic indentation produced by the
 ".PP" command should be added to the indentation
 produced by the ".I" command.
 .M 4
-.LP
+.PP
 With the ".M" command, the first character of
 each line of output should be preceded by
 the specified number of blanks.
