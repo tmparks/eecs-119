@@ -14,7 +14,7 @@ def new_coyotes(old_rabbits, old_coyotes):
 
 
 def small_change(old, new):
-    return old != 0.0 and abs((new - old) / old) < 1e-2
+    return abs(new - old) < 1e-2 * abs(old)
 
 
 def update(old_rabbits, old_coyotes):
