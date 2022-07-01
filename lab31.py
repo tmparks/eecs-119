@@ -25,11 +25,6 @@ def update(old_rabbits, old_coyotes):
     return (stop, rabbits, coyotes)
 
 
-def left_pad(spaces, text):
-    width = str(spaces + len(text))
-    return format(text, '>' + width)
-
-
 def print_line(month, rabbits, coyotes):
     if month % 3 != 0:
         return
@@ -38,17 +33,17 @@ def print_line(month, rabbits, coyotes):
     left = ''
     right = ''
     if rabbit_column < coyote_column and rabbits > 0.0:
-        left = left_pad(rabbit_column, 'r')
-        right = left_pad(coyote_column - rabbit_column - 1, 'c')
+        left = 'r'.rjust(rabbit_column + 1)
+        right = 'c'.rjust(coyote_column - rabbit_column)
     elif coyote_column < rabbit_column and coyotes > 0.0:
-        left = left_pad(coyote_column, 'c')
-        right = left_pad(rabbit_column - coyote_column - 1, 'r')
+        left = 'c'.rjust(coyote_column + 1)
+        right = 'r'.rjust(rabbit_column - coyote_column)
     elif rabbits > 0.0:
-        left = left_pad(rabbit_column, 'r')
+        left = 'r'.rjust(rabbit_column + 1)
     print(format(month, '3') + '|' + left + right)
 
 
-rabbits = 10.0 # Ten rabbits escape in month 0
+rabbits = 10.0  # Ten rabbits escape in month 0
 coyotes = 0.0
 
 for month in range(300):
