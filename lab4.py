@@ -67,13 +67,13 @@ class TextFormatter:
 
     def command(self, line):
         args = line.split()
-        if args[0] == '.PP':         # new paragraph
-            self.paragraph('     ')  # indent by 5
+        if args[0] == '.PP':                # new paragraph
+            self.paragraph(self.spaces(5))  # indent
         elif args[0] == '.LP':
-            self.paragraph('')       # no indent
+            self.paragraph('')              # no indent
         elif args[0] == '.IP':
             self.next_indent = self.spaces(int(args[1]))
-            self.paragraph('')       # no additional indent
+            self.paragraph('')              # no additional indent
             self.output = self.margin + self.label(len(self.indent), args[2:])
         elif args[0] == '.W':
             self.next_width = int(args[1])
