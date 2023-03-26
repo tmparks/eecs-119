@@ -49,12 +49,6 @@ class TextFormatter:
         self.justify = self.next_justify
         self.output = self.margin + self.indent + indent
 
-    def spaces(self, width):
-        spaces = ''
-        if width > 0:
-            spaces = ' '.ljust(width)
-        return spaces
-
     def label(self, width, words):
         label = ' '.join(words)
         if label.startswith('<'):
@@ -67,22 +61,22 @@ class TextFormatter:
 
     def command(self, line):
         args = line.split()
-        if args[0] == '.PP':                # new paragraph
-            self.paragraph(self.spaces(5))  # indent
+        if args[0] == '.PP':         # new paragraph
+            self.paragraph(5 * ' ')  # indent
         elif args[0] == '.LP':
-            self.paragraph('')              # no indent
+            self.paragraph('')       # no indent
         elif args[0] == '.IP':
-            self.next_indent = self.spaces(int(args[1]))
-            self.paragraph('')              # no additional indent
+            self.next_indent = int(args[1]) * ' '
+            self.paragraph('')       # no additional indent
             self.output = self.margin + self.label(len(self.indent), args[2:])
         elif args[0] == '.W':
             self.next_width = int(args[1])
         elif args[0] == '.SP':
             self.next_space = int(args[1])
         elif args[0] == '.I':
-            self.next_indent = self.spaces(int(args[1]))
+            self.next_indent = int(args[1]) * ' '
         elif args[0] == '.M':
-            self.next_margin = self.spaces(int(args[1]))
+            self.next_margin = int(args[1]) * ' '
         elif args[0] == '.JST':
             self.next_justify = True
         elif args[0] == '.NJST':
@@ -92,6 +86,8 @@ class TextFormatter:
             self.format = False
         elif args[0] == '.FI':
             self.format = True
+        else:
+            pass  # ignore unrecognized commands
 
     def text(self, line):
         length = (len(self.output)
