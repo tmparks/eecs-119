@@ -2,6 +2,7 @@
 
 class Plotter:
     page = list()  # page (list of rows)
+    off = 0        # number of off-page points
     rows = 0       # number of rows on the page
     columns = 0    # number of columns on the page
     row = 0        # vertical position
@@ -28,6 +29,8 @@ class Plotter:
                     and 0 <= column and column < self.columns):
                 line = self.page[row]
                 self.page[row] = line[:column] + '*' + line[column+1:]
+            else:
+                self.off += 1
 
     def vchange(self, row_change):
         self.row_change = row_change
@@ -40,6 +43,9 @@ class Plotter:
         for row in reversed(self.page): # print rows from top to bottom
             print('│', ''.join(row), '│')
         print('└', '─' * self.columns, '┘')
+        if (self.off > 0):
+            print('There were', self.off, 'off-page points')
+            self.off = 0
 
     def erase(self):
         self.page.clear()
