@@ -60,23 +60,23 @@ def read_words(file_name):
 def read_commands(file_name, plotter):
     words = read_words(file_name) # generator
     for word in words:
-        command = word.lower()
-        if 'move'.startswith(command):
+        command = word.lower() # ignore case
+        if command.startswith('m'):
             row = float(next(words))
             column = float(next(words))
             plotter.move(row, column)
-        elif 'step'.startswith(command):
+        elif command.startswith('s'):
             count = int(next(words))
             plotter.step(count)
-        elif 'vchange'.startswith(command):
+        elif command.startswith('v'):
             change = float(next(words))
             plotter.vchange(change)
-        elif 'hchange'.startswith(command):
+        elif command.startswith('h'):
             change = float(next(words))
             plotter.hchange(change)
-        elif 'print'.startswith(command):
+        elif command.startswith('p'):
             plotter.print()
-        elif 'erase'.startswith(command):
+        elif command.startswith('e'):
             plotter.erase()
         else:
             print('Unrecognized command ' + command)
