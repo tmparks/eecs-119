@@ -39,10 +39,10 @@ class Plotter:
         self.column_change = column_change
 
     def print(self):
-        print('┌', '─' * self.columns, '┐')
+        print('╭' + '─' * self.columns +'╮')
         for row in reversed(self.page): # print rows from top to bottom
-            print('│', ''.join(row), '│')
-        print('└', '─' * self.columns, '┘')
+            print('│' + ''.join(row) + '│')
+        print('╰' + '─' * self.columns + '╯')
         if (self.off > 0):
             print('There were', self.off, 'off-page points')
             self.off = 0
