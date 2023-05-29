@@ -89,8 +89,8 @@ def read_commands(file_name, plotter):
 
 
 p = Plotter(rows=56, columns=130)
-read_commands('lab51.txt', p)
-read_commands('lab52.txt', p)
-read_commands('lab53.txt', p)
-read_commands('lab54.txt', p)
-read_commands('lab55.txt', p)
+read_commands('lab05a.txt', p)
+read_commands('lab05b.txt', p)
+read_commands('lab05c.txt', p)
+read_commands('lab05d.txt', p)
+read_commands('lab05e.txt', p)
