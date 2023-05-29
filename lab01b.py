@@ -39,7 +39,7 @@ def two_largest(numbers):
     print('Next largest value:', next_largest)
 
 
-two_largest(read_sequence('lab02.txt'))
+two_largest(read_sequence('lab01b.txt'))
 
 # Additional test cases.
 # two_largest([1, 2, 3, 4, 5])
