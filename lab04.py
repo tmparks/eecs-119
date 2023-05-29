@@ -115,8 +115,8 @@ class TextFormatter:
 
 print('1234567890123456789012345678901234567890')
 f = TextFormatter()
-f.format('lab41.txt')
-f.format('lab42.txt')
-f.format('lab43.txt')
-f.format('lab44.txt')
-f.format('lab45.txt')
+f.format('lab04a.txt')
+f.format('lab04b.txt')
+f.format('lab04c.txt')
+f.format('lab04d.txt')
+f.format('lab04e.txt')

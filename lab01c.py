@@ -33,4 +33,4 @@ def print_words(file_name):
         print(' '.join(line))
 
 
-print_words('lab03.txt')
+print_words('lab01c.txt')

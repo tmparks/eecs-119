@@ -10,4 +10,4 @@ def longest_word(file_name):
             print(max(len(word) for word in line.split()))
 
 
-longest_word('lab21.txt')
+longest_word('lab02a.txt')
