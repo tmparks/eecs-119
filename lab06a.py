@@ -1,27 +1,21 @@
 #!/usr/bin/env python3
 
-def swap(n, left, right):
-    """
-    Swap two elements and move the left and right indices
-    """
-    temp = n[left]
-    n[left] = n[right]
-    n[right] = temp
-    left += 1
-    right -= 1
-    return (left, right)
-
 def quicksort(n, i, j):
     left = i+1
     right = j
     pick = n[i]
     while left <= right:
-        while n[left] < pick: # go left until an element is out of place
+        while left <= j and n[left] <= pick: # adjust left until an element is out of place
             left += 1
-        while n[right] > pick: # go right until an element is out of place
+        while right >= i and n[right] >= pick: # adjust right until an element is out of place
             right -= 1
-        if left <= right: # interchange the elements
-            (left, right) = swap(n, left, right)
+        if left < right: # interchange the elements
+            (n[left], n[right]) = (n[right], n[left])
+            left += 1
+            right -= 1
+    if i < right: # move pick into position
+        (n[i], n[right]) = (n[right], n[i])
+        right -= 1
     if right > i: # recurse on smaller problems
         quicksort(n, i, right)
     if left < j:
