@@ -21,14 +21,25 @@ def quicksort(n, i, j):
     if left < j:
         quicksort(n, left, j)
 
-size = 15 # maximum problem size
+import random
+def test():
+    for size in range(1, 30):
+        input = list()
+        for _ in range(size):
+            input.append(random.randrange(size))
+        expected = sorted(input)
+        result = input.copy()
+        quicksort(result, 0, len(result) - 1)
+        if result != expected:
+            print('   input', input)
+            print('  result', result)
+            print('expected', expected)
+
+test()
+
 n = list()
-print('I can sort arrays of size up to', size)
-arraysize = int(input('How large an array would you like to sort? '))
-print('Now enter the elements of your array, each on a separate line')
-for k in range(arraysize):
-    n.append(int(input()))
-quicksort(n, 0, arraysize-1)
-print('Sorted numbers are ')
-for k in range(arraysize):
-    print(n[k])
+print('Enter the elements of your array, all on one line')
+for word in input().split():
+    n.append(int(word))
+quicksort(n, 0, len(n) - 1)
+print('Sorted numbers are ', n)
