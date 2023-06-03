@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 
 def quicksort(n, i, j):
-    left = i+1
+    left = i
     right = j
     pick = n[i]
     while left <= right:
-        while left <= j and n[left] <= pick: # adjust left until an element is out of place
+        while n[left] < pick: # adjust left until an element is out of place
             left += 1
-        while right >= i and n[right] >= pick: # adjust right until an element is out of place
+        while n[right] > pick: # adjust right until an element is out of place
             right -= 1
-        if left < right: # interchange the elements
+        if left <= right: # interchange the elements
             (n[left], n[right]) = (n[right], n[left])
             left += 1
             right -= 1
-    if i < right: # move pick into position
-        (n[i], n[right]) = (n[right], n[i])
-        right -= 1
     if right > i: # recurse on smaller problems
         quicksort(n, i, right)
     if left < j:
