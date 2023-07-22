@@ -1,39 +1,47 @@
 #!/usr/bin/env python3
 
-def new_picture(lines, columns):
-    picture = list()
-    for l in range(lines):
-        line = list()
-        for c in range(columns):
-            line.append(0)
-        picture.append(line)
-    return picture
+class Picture:
+    light = 0        # value for light pixels
+    dark = -1        # value for dark pixels
+    lines = 0        # number of lines in picture
+    columns = 0      # number of columns in picture
+    picture = list() # picture (list of lines)
 
-def read_picture(file_name):
-    with open(file_name) as file:
-        lines = int(next(file))
-        columns = int(next(file))
-        picture = new_picture(lines, columns)
+    def erase(self, lines, columns):
+        self.lines = lines
+        self.columns = columns
+        self.picture = list()
         for l in range(lines):
-            line = next(file)
+            line = list()
             for c in range(columns):
-                if line[c] == '*':
-                    picture[l][c] = 1
-    return picture
+                line.append(self.light)
+            self.picture.append(line)
 
-def print_picture(picture):
-    print(len(picture))
-    print(len(picture[0]))
-    for line in picture:
-        for pixel in line:
-            if pixel == 0:
-                print('-', end='')
-            else:
-                print('*', end='')
-        print()
+    def read(self, file_name):
+        with open(file_name) as file:
+            lines = int(next(file))
+            columns = int(next(file))
+            self.erase(lines, columns)
+            for l in range(lines):
+                line = next(file)
+                for c in range(columns):
+                    if line[c] == '*':
+                        self.picture[l][c] = self.dark
+
+    def print(self):
+        print(self.lines)
+        print(self.columns)
+        for line in self.picture:
+            for pixel in line:
+                if pixel == self.light:
+                    print('-', end='')
+                else:
+                    print('*', end='')
+            print()
 
 def test():
-    picture = read_picture('lab07a.txt')
-    print_picture(picture)
+    p = Picture()
+    p.read('lab07a.txt')
+    p.print()
 
 test()
