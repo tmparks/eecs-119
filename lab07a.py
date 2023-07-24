@@ -5,10 +5,10 @@ class Picture:
     dark = -1   # initial value for dark pixels
     lines = 0   # number of lines in picture
     columns = 0 # number of columns in picture
-    light_regions = 0 # number of light regions
-    dark_regions = 0  # number of dark regions
-    light_edge_regions = set() # colors for light regions that touch the edge
-    dark_edge_regions = set()  # colors for dark regions that touch the an edge
+    light_regions = set() # colors of light regions
+    dark_regions = set()  # colors of dark regions
+    light_edge_regions = set() # colors of light regions that touch the edge
+    dark_edge_regions = set()  # colors of dark regions that touch the an edge
     region_sizes = dict() # sizes of regions
     picture = list()      # picture (list of lines)
 
@@ -33,12 +33,10 @@ class Picture:
                     if line[c] == '*':
                         self.picture[l][c] = self.dark
 
-    def print(self, min, max):
-        print(self.lines)
-        print(self.columns)
+    def print(self, dark_regions):
         for line in self.picture:
             for pixel in line:
-                if pixel <= self.dark and min <= self.region_sizes[pixel] and self.region_sizes[pixel] <= max:
+                if pixel in dark_regions:
                     print('*', end='')
                 else:
                     print('-', end='')
@@ -48,12 +46,12 @@ class Picture:
         for l in range(self.lines):
             for c in range(self.columns):
                 if self.picture[l][c] == self.light:
-                    self.light_regions += 1
-                    color = self.light + self.light_regions
+                    color = self.light + len(self.light_regions) + 1
+                    self.light_regions.add(color)
                     self.region_sizes[color] = self.flood(l, c, self.light, color)
                 elif self.picture[l][c] == self.dark:
-                    self.dark_regions += 1
-                    color = self.dark - self.dark_regions
+                    color = self.dark - len(self.dark_regions) - 1
+                    self.dark_regions.add(color)
                     self.region_sizes[color] = self.flood(l, c, self.dark, color)
                 self.check_edge(l, c)
 
@@ -76,26 +74,36 @@ class Picture:
 
     def check_edge(self, l, c):
         if l == 0 or c == 0 or l == self.lines - 1 or c == self.columns - 1:
-            if self.picture[l][c] >= self.light:
-                self.light_edge_regions.add(self.picture[l][c])
-            if self.picture[l][c] <= self.dark:
-                self.dark_edge_regions.add(self.picture[l][c])
+            color = self.picture[l][c]
+            if color >= self.light:
+                self.light_edge_regions.add(color)
+            if color <= self.dark:
+                self.dark_edge_regions.add(color)
+    
+    def regions_by_size(self, regions, min, max):
+        result = set()
+        for color in regions:
+            size = self.region_sizes[color]
+            if min <= size and size <= max:
+                result.add(color)
+        return result
 
 def test():
     p = Picture()
     p.read('lab07a.txt')
     p.color()
-    p.print(1, 100*100)
-    print('There are', p.light_regions, 'light regions.')
+    p.print(p.dark_regions)
+    print('There are', len(p.light_regions), 'light regions.')
     print(len(p.light_edge_regions), 'touch an edge')
-    print('There are', p.dark_regions, 'dark regions')
+    print('There are', len(p.dark_regions), 'dark regions')
     print(len(p.dark_edge_regions), 'touch an edge')
     print('Regions with 1 to 20 pixels')
-    p.print(1, 20)
+    p.print(p.regions_by_size(p.dark_regions, 1, 20))
     print('Regions with 21 to 40 pixels')
-    p.print(21, 40)
+    p.print(p.regions_by_size(p.dark_regions, 21, 40))
     print('Regions with 41 to 80 pixels')
-    p.print(41, 80)
+    p.print(p.regions_by_size(p.dark_regions, 41, 80))
     print('Regions with more than 80 pixels')
-    p.print(80, 100*100)
+    p.print(p.regions_by_size(p.dark_regions, 80, 100*100))
+
 test()
