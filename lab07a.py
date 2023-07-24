@@ -3,6 +3,7 @@
 class Picture:
     light = +1  # initial value for light pixels
     dark = -1   # initial value for dark pixels
+    neutral = 0 # temporary value for pixels
     lines = 0   # number of lines in picture
     columns = 0 # number of columns in picture
     light_regions = set() # colors of light regions
@@ -57,9 +58,9 @@ class Picture:
 
     def flood(self, l, c, old_color, new_color):
         size = 0
-        if (0 <= l and l < self.lines
-            and 0 <= c and c < self.columns
-            and self.picture[l][c] == old_color):
+        if (    0 <= l and l < self.lines
+                and 0 <= c and c < self.columns
+                and self.picture[l][c] == old_color):
             self.picture[l][c] = new_color
             size += 1
             size += self.flood(l+1, c, old_color, new_color)
@@ -79,7 +80,33 @@ class Picture:
                 self.light_edge_regions.add(color)
             if color <= self.dark:
                 self.dark_edge_regions.add(color)
-    
+
+    def neighbors(self, l, c, color):
+        result = set()
+        if 0 <= l and l < self.lines and 0 <= c and c < self.columns:
+            if self.picture[l][c] == color:
+                self.picture[l][c] = self.neutral
+                result.update(self.neighbors(l+1, c, color))
+                result.update(self.neighbors(l-1, c, color))
+                result.update(self.neighbors(l, c+1, color))
+                result.update(self.neighbors(l, c-1, color))
+            elif self.picture[l][c] != self.neutral:
+                result.add(self.picture[l][c])
+        return result
+
+    def surrounded(self):
+        result = set()
+        light_regions = self.light_regions - self.light_edge_regions
+        dark_regions = self.dark_regions - self.dark_edge_regions
+        for l in range(self.lines):
+            for c in range(self.columns):
+                color = self.picture[l][c]
+                if color in dark_regions:
+                    if self.neighbors(l, c, color).issubset(light_regions):
+                        result.add(color)
+                    self.flood(l, c, self.neutral, color)
+        return result
+
     def regions_by_size(self, regions, min, max):
         result = set()
         for color in regions:
@@ -105,5 +132,8 @@ def test():
     p.print(p.regions_by_size(p.dark_regions, 41, 80))
     print('Regions with more than 80 pixels')
     p.print(p.regions_by_size(p.dark_regions, 80, 100*100))
+    print('Surrounded regions')
+    p.print(p.surrounded())
+
 
 test()
