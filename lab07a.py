@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 class Picture:
-    light = +1        # value for light pixels
-    dark = -1         # value for dark pixels
-    lines = 0         # number of lines in picture
-    columns = 0       # number of columns in picture
+    light = +1  # initial value for light pixels
+    dark = -1   # initial value for dark pixels
+    lines = 0   # number of lines in picture
+    columns = 0 # number of columns in picture
     light_regions = 0 # number of light regions
     dark_regions = 0  # number of dark regions
+    light_edge_regions = set() # colors for light regions that touch the edge
+    dark_edge_regions = set()  # colors for dark regions that touch the an edge
     picture = list()  # picture (list of lines)
 
     def erase(self, lines, columns):
@@ -50,6 +52,7 @@ class Picture:
                 elif self.picture[l][c] == self.dark:
                     self.dark_regions += 1
                     self.flood(l, c, self.dark, self.dark - self.dark_regions)
+                self.check_edge(l, c)
 
     def flood(self, l, c, old_color, new_color):
         if (0 <= l and l < self.lines
@@ -65,12 +68,21 @@ class Picture:
             # self.flood(l-1, c+1, old_color, new_color)
             # self.flood(l-1, c-1, old_color, new_color)
 
+    def check_edge(self, l, c):
+        if l == 0 or c == 0 or l == self.lines - 1 or c == self.columns - 1:
+            if self.picture[l][c] >= self.light:
+                self.light_edge_regions.add(self.picture[l][c])
+            if self.picture[l][c] <= self.dark:
+                self.dark_edge_regions.add(self.picture[l][c])
+
 def test():
     p = Picture()
     p.read('lab07a.txt')
     p.color()
     p.print()
-    print('There are', p.light_regions, 'light regions')
+    print('There are', p.light_regions, 'light regions.')
+    print(len(p.light_edge_regions), 'touch an edge')
     print('There are', p.dark_regions, 'dark regions')
+    print(len(p.dark_edge_regions), 'touch an edge')
 
 test()
