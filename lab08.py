@@ -34,6 +34,54 @@ class Database:
             for key in self.grades:
                 self.grades[key].append(int(input('Grade for {}? '.format(key))))
 
+    def change(self):
+        choice = input('Change assignment name, student name, or grade? ').strip().lower()
+        if choice.startswith('a'):
+            self.change_assignment_name()
+        elif choice.startswith('s'):
+            self.change_student_name()
+        elif choice.startswith('g'):
+            self.change_grade()
+        else:
+            print(choice, 'is an invalid choice')
+        
+    def change_assignment_name(self):
+        old_name = input('Current assignment name? ').strip()
+        if old_name in self.assignments:
+            index = self.assignments.index(old_name)
+            new_name = input('New assignment name? ').strip()
+            if new_name in self.assignments:
+                print('There is already an assignment with the name', new_name)
+            else:
+                self.assignments[index] = new_name
+        else:
+            print('There is no assignment with the name', old_name)
+
+    def change_student_name(self):
+        old_name = input('Current student name? ').strip()
+        if old_name in self.grades:
+            new_name = input('New student name? ').strip()
+            if new_name in self.grades:
+                print('There is already a student with the name', new_name)
+            else:
+                self.grades[new_name] = self.grades[old_name]
+                del self.grades[old_name]
+        else:
+            print('There is no student with the name', old_name)
+
+    def change_grade(self):
+        assignment = input('Assignment name? ').strip()
+        if assignment in self.assignments:
+            index = self.assignments.index(assignment)
+            student = input('Student name? ').strip()
+            if student in self.grades:
+                print('Current grade:', self.grades[student][index])
+                self.grades[student][index] = int(input('New grade? '))
+            else:
+                print('There is no student with the name', student)
+        else:
+            print('There is no assignment with the name', assignment)
+
     def save(self, file_name):
         with open(file_name, 'wb') as file:
             pickle.dump(self.assignments, file)
@@ -58,6 +106,8 @@ def test():
     # d.save('lab08.pickle')
     # d.list('lab08.txt')
     d.edit('lab08.pickle')
+    d.type()
+    d.change()
     d.type()
 
 test()
