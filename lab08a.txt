@@ -1,0 +1,30 @@
+NEW
+Alice
+Bob
+Charlie
+END
+UPDATE
+Assignment 1
+100
+90
+80
+UPDATE
+Assignment 2
+100
+90
+80
+CHANGE
+ASSIGNMENT NAME
+Assignment 1
+Assignment One
+CHANGE
+STUDENT NAME
+Charlie
+Charles
+CHANGE
+GRADE
+Assignment One
+Charles
+95
+TYPE
+QUIT
