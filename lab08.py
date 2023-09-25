@@ -7,6 +7,7 @@ import sys
 class Database:
     assignments = list() # A list of assignment names
     grades = collections.defaultdict(list) # A list of grades for each student
+    modified = False # Indicates unsaved modifications
 
     def new(self):
         self.assignments.clear()
@@ -19,6 +20,7 @@ class Database:
                 print('There is already a student with the name', student)
             else:
                 self.grades[student].clear()
+        self.modified = True
 
     def edit(self, file_name):
         with open(file_name, 'rb') as file:
@@ -34,6 +36,7 @@ class Database:
             self.assignments.append(assignment)
             for key in self.grades:
                 self.grades[key].append(int(input('Grade for {}? '.format(key))))
+            self.modified = True
 
     def change(self):
         choice = input('Change assignment name, student name, or grade? ').strip().lower()
@@ -56,6 +59,7 @@ class Database:
                 print('There is already an assignment with the name', new_name)
             else:
                 self.assignments[index] = new_name
+                self.modified = True
         else:
             print('There is no assignment with the name', old_name)
 
@@ -69,6 +73,7 @@ class Database:
             else:
                 self.grades[new_name] = self.grades[old_name]
                 del self.grades[old_name]
+                self.modified = True
         else:
             print('There is no student with the name', old_name)
 
@@ -82,6 +87,7 @@ class Database:
             if student in self.grades:
                 print('Current grade:', self.grades[student][index])
                 self.grades[student][index] = int(input('New grade? '))
+                self.modified = True
             else:
                 print('There is no student with the name', student)
         else:
@@ -93,6 +99,7 @@ class Database:
         with open(file_name, 'wb') as file:
             pickle.dump(self.assignments, file)
             pickle.dump(self.grades, file)
+        self.modified = False
 
     def type(self, file=sys.stdout):
         assert self.assignments, 'There are no assignments in the database'
@@ -131,7 +138,9 @@ def read_commands(database):
             elif command.startswith('h'):
                 help(command.split().pop())
             elif command.startswith('q'):
-                database.save('lab08.pickle')
+                if database.modified and bool(input('Save before quitting? ')):
+                    database.save('lab08.pickle')
+                    print('Database saved')
                 break
             else:
                 print('Unrecognized command ' + command)
