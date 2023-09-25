@@ -143,28 +143,30 @@ def help(command):
         print('"HELP <comm>" with <comm> replaced by the desired command name.')
 
 def read_commands(database):
+    binary_file_name = 'lab08_save.pickle'
+    text_file_name = 'lab08_list.txt'
     while True:
         try:
             command = input('Command? ').strip().lower() # ignore case
             if command.startswith('n'):
                 database.new()
             elif command.startswith('e'):
-                database.edit('lab08.pickle')
+                database.edit(binary_file_name)
             elif command.startswith('u'):
                 database.update()
             elif command.startswith('c'):
                 database.change()
             elif command.startswith('s'):
-                database.save('lab08.pickle')
+                database.save(binary_file_name)
             elif command.startswith('t'):
                 database.type()
             elif command.startswith('l'):
-                database.list('lab08.txt')
+                database.list(text_file_name)
             elif command.startswith('h'):
                 help(command.split().pop())
             elif command.startswith('q'):
                 if database.modified and bool(input('Save before quitting? ')):
-                    database.save('lab08.pickle')
+                    database.save(binary_file_name)
                     print('Database saved')
                 break
             else:
@@ -175,14 +177,5 @@ def read_commands(database):
 def test():
     d = Database()
     read_commands(d)
-    # d.new()
-    # d.update()
-    # d.type()
-    # d.save('lab08.pickle')
-    # d.list('lab08.txt')
-    # d.edit('lab08.pickle')
-    # d.type()
-    # d.change()
-    # d.type()
 
 test()
