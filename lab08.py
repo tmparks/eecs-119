@@ -12,6 +12,7 @@ class Database:
     def new(self):
         self.assignments.clear()
         self.grades.clear()
+        print('Enter "END" after the last student name')
         while True:
             student = input('Student name? ').strip()
             if student.lower() == 'end':
@@ -115,7 +116,31 @@ class Database:
             self.type(file)
 
 def help(command):
-    pass # TODO
+    if command == 'new':
+        print('Discard current database content, if any, and create a new database.')
+        print('You will be prompted for student names.')
+    elif command == 'edit':
+        print('Discard curent database content, if any, and read data from a file.')
+        print('See SAVE')
+    elif command == 'update':
+        print('Enter grades for a new assignment. You will be prompted for')
+        print('the name of the assignment and the grade for each student')
+    elif command == 'change':
+        print('Change a student name, a grade, or an assignment name.')
+    elif command == 'save':
+        print('Save the current database content to a file.')
+        print('See EDIT')
+    elif command == 'type':
+        print('Display the current database content in human-readable form.')
+    elif command == 'list':
+        print('Save the current database content to a file in human-readable form.')
+    elif command == 'quit':
+        print('Quit from the current session. You will be prompted to')
+        print('save the database if there are any unsaved modifictions')
+    else:
+        print('Available commands: NEW, EDIT, UPDATE, CHANGE, SAVE, TYPE, LIST, HELP, QUIT')
+        print('To get information about any of the commands, type a line containing')
+        print('"HELP <comm>" with <comm> replaced by the desired command name.')
 
 def read_commands(database):
     while True:
@@ -143,7 +168,7 @@ def read_commands(database):
                     print('Database saved')
                 break
             else:
-                print('Unrecognized command ' + command)
+                print('Unrecognized command', command)
         except AssertionError as e:
             print(e)
 
