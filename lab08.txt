@@ -27,4 +27,6 @@ Assignment One
 Charles
 95
 TYPE
+LIST
 QUIT
+yes
