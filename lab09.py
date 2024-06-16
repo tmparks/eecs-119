@@ -14,15 +14,17 @@ class Point:
         """
         Euclidean distance between points.
         """
-        return sum((b - a)**2 for a, b in zip(self.coordinates, other.coordinates))
+        return math.sqrt(sum((b - a)**2 for a, b in zip(self.coordinates, other.coordinates)))
 
 
 class Line:
     points = tuple()  # tuple with 2 points
+    length = 0.0  # distance between the 2 points
 
     def __init__(self, points):
         assert len(points) == 2, 'a line must have exactly 2 points'
         self.points = tuple(points)
+        self.length = self.points[0].distance(self.points[1])
 
     def distance(self, point):
         """
@@ -35,8 +37,24 @@ class Line:
         x2 = self.points[1].coordinates[0]
         y2 = self.points[1].coordinates[1]
         numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
-        denominator = self.points[0].distance(self.points[1])
-        return numerator / denominator
+        return numerator / self.length
+
+
+class LineSegment(Line):
+    def distance(self, point):
+        x0 = point.coordinates[0]
+        y0 = point.coordinates[1]
+        x1 = self.points[0].coordinates[0]
+        y1 = self.points[0].coordinates[1]
+        x2 = self.points[1].coordinates[0]
+        y2 = self.points[1].coordinates[1]
+        dot_product = (x2-x1)*(x0-x1) + (y2-y1)*(y0-y1)
+        if dot_product <= 0.0:
+            return point.distance(self.points[0])
+        elif dot_product >= self.length**2:
+            return point.distance(self.points[1])
+        else:
+            return Line.distance(self, point)
 
 
 def test():
@@ -44,15 +62,37 @@ def test():
     p2 = Point((3.0, 4.0))
     p3 = Point((1.0, 4.0))
     p4 = Point((3.0, 2.0))
+    p5 = Point((5.0, 6.0))
+    p6 = Point((5.0, 0.0))
+
+    assert math.isclose(p1.distance(p2), math.sqrt(8.0))
+    assert math.isclose(p2.distance(p3), 2.0)
+    assert math.isclose(p3.distance(p4), math.sqrt(8.0))
+    assert math.isclose(p4.distance(p5), math.sqrt(20.0))
+    assert math.isclose(p5.distance(p6), 6.0)
 
     l1 = Line((p1, p2))
     l2 = Line((p3, p4))
 
-    print(p1.distance(p2))
-    print(p3.distance(p4))
+    assert math.isclose(l1.distance(p5), 0)
+    assert math.isclose(l2.distance(p6), 0)
 
-    print(l1.distance(Point((5.0, 6.0))))
-    print(l2.distance(Point((5.0, 0.0))))
+    s1 = LineSegment(l1.points)
+    s2 = LineSegment(l2.points)
+
+    assert math.isclose(s1.distance(p1), 0.0)
+    assert math.isclose(s1.distance(p2), 0.0)
+    assert math.isclose(s1.distance(p3), l1.distance(p3))
+    assert math.isclose(s1.distance(p4), l1.distance(p4))
+    assert math.isclose(s1.distance(p5), p2.distance(p5))
+    assert math.isclose(s1.distance(p6), l1.distance(p6))
+
+    assert math.isclose(s2.distance(p1), l2.distance(p1))
+    assert math.isclose(s2.distance(p2), l2.distance(p2))
+    assert math.isclose(s2.distance(p3), 0.0)
+    assert math.isclose(s2.distance(p4), 0.0)
+    assert math.isclose(s2.distance(p5), l2.distance(p5))
+    assert math.isclose(s2.distance(p6), p4.distance(p6))
 
 
 test()
