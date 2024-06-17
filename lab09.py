@@ -57,6 +57,24 @@ class LineSegment(Line):
             return Line.distance(self, point)
 
 
+class Polygon:
+    vertices = list()  # ordered list of vertices
+    edges = list()  # ordered list of edges
+
+    def __init__(self, vertices):
+        self.vertices = list(vertices)
+        self.edges = list(LineSegment((
+            self.vertices[i],
+            self.vertices[(i+1) % len(vertices)]))
+            for i in range(len(vertices)))
+
+    def vertex_distance(self, point):
+        return min(v.distance(point) for v in self.vertices)
+
+    def edge_distance(self, point):
+        return min(e.distance(point) for e in self.edges)
+
+
 def test():
     p1 = Point((1.0, 2.0))
     p2 = Point((3.0, 4.0))
@@ -94,5 +112,24 @@ def test():
     assert math.isclose(s2.distance(p5), l2.distance(p5))
     assert math.isclose(s2.distance(p6), p4.distance(p6))
 
+    square = Polygon(
+        [Point((0.0, 0.0)),
+         Point((2.0, 0.0)),
+         Point((2.0, 2.0)),
+         Point((0.0, 2.0))])
+    
+    assert math.isclose(square.vertex_distance(p1), 1.0)
+    assert math.isclose(square.vertex_distance(p2), math.sqrt(5.0))
+    assert math.isclose(square.vertex_distance(p3), math.sqrt(5.0))
+    assert math.isclose(square.vertex_distance(p4), 1.0)
+    assert math.isclose(square.vertex_distance(p5), math.sqrt(25.0))
+    assert math.isclose(square.vertex_distance(p6), 3.0)
+
+    assert math.isclose(square.edge_distance(p1), 0.0)
+    assert math.isclose(square.edge_distance(p2), math.sqrt(5.0))
+    assert math.isclose(square.edge_distance(p3), 2.0)
+    assert math.isclose(square.edge_distance(p4), 1.0)
+    assert math.isclose(square.edge_distance(p5), math.sqrt(25.0))
+    assert math.isclose(square.edge_distance(p6), 3.0)
 
 test()
