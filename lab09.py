@@ -70,35 +70,72 @@ class LineSegment(Line):
 ################################################################################
 
 class Polygon:
-    vertices = list()  # ordered list of vertices
-    edges = list()  # ordered list of edges
+    _vertices = list()  # ordered list of vertices
+    _edges = list()     # ordered list of edges, lazily evaluated
 
     def __init__(self, vertices):
-        self.vertices = list(vertices)
-        self.edges = list()
+        self._vertices = list(vertices)
+        self._edges = list()
 
     def __eq__(self, other):
-        return (len(self.vertices) == len(other.vertices)
-                and all(a == b for a, b in zip(self.vertices, other.vertices)))
+        """
+        Compare to another polygon.
+        """
+        return (len(self._vertices) == len(other._vertices)
+                and all(a == b for a, b in zip(self._vertices, other._vertices)))
+
+    def size(self):
+        """
+        Get the number of vertices.
+        """
+        return len(self._vertices)
 
     def add(self, point):
-        self.vertices.append(point)
-        self.edges.clear()
+        """
+        Add a vertex to the polygon.
+        """
+        self._vertices.append(point)
+        self._edges.clear()
 
-    def delete(self, point):
-        self.vertices.remove(point)
-        self.edges.clear()
+    def delete(self, index):
+        """
+        Delete a vertex from the polygon.
+        """
+        self._vertices.pop(index)
+        self._edges.clear()
+
+    def find_vertex(self, point):
+        """
+        Find the vertex nearest to a point.
+        Return the index of the nearest vertex.
+        """
+        nearest = 0
+        min_distance = self._vertices[nearest].distance(point)
+        for i in range(1, len(self._vertices)):
+            distance = self._vertices[i].distance(point)
+            if distance < min_distance:
+                nearest = i
+                min_distance = distance
+        return nearest
 
     def vertex_distance(self, point):
-        return min(v.distance(point) for v in self.vertices)
+        """
+        Find the distance from a point to the nearest vertex.
+        """
+        return min(v.distance(point) for v in self._vertices)
 
     def edge_distance(self, point):
-        if len(self.edges) == 0:
-            self.edges = list(LineSegment((
-                self.vertices[i],
-                self.vertices[(i+1) % len(self.vertices)]))
-                for i in range(len(self.vertices)))
-        return min(e.distance(point) for e in self.edges)
+        """
+        Find the distance from a point to the nearest edge.
+        """
+        if len(self._edges) == 0:
+            self._edges = list(LineSegment((
+                self._vertices[i],
+                self._vertices[i+1]))
+                for i in range(len(self._vertices)-1))
+            self._edges.append(LineSegment(
+                (self._vertices[-1], self._vertices[0])))
+        return min(e.distance(point) for e in self._edges)
 
 
 ################################################################################
@@ -106,11 +143,65 @@ class Polygon:
 class Scene:
     polygons = list()  # ordered list of polygons
 
-    def add(self, polygon):
-        self.polygons += polygon
+    def add_polygon(self, polygon):
+        """
+        Add a polygon to the scene.
+        """
+        self.polygons.append(polygon)
 
-    def delete(self, polygon):
-        self.polygons.remove(polygon)
+    def add_point(self, point):
+        """
+        Add a point to the polygon with the nerest vertex.
+        """
+        nearest = self.find_polygon_by_vertex(point)
+        self.polygons[nearest].add(point)
+
+    def delete_polygon(self, point):
+        """
+        Delete the polygon nearest to a point.
+        """
+        nearest = self.find_polygon_by_edge(point)
+        self.polygons.pop(nearest)
+
+    def delete_point(self, point):
+        """
+        Delete from its polygon the vertex nearest to a point.
+        Delete the polygon if it has fewer than 3 remaining vertices.
+        """
+        nearest_polygon = self.find_polygon_by_vertex(point)
+        if self.polygons[nearest_polygon].size() <= 3:
+            self.polygons.pop(nearest_polygon)
+        else:
+            nearest_vertex = self.polygons[nearest_polygon].find_vertex(point)
+            self.polygons[nearest_polygon].delete(nearest_vertex)
+
+    def find_polygon_by_edge(self, point):
+        """
+        Find the polygon with the edge nearest to a point.
+        Return the index of the nearest polygon.
+        """
+        nearest = 0
+        min_distance = self.polygons[nearest].edge_distance(point)
+        for i in range(1, len(self.polygons)):
+            distance = self.polygons[i].edge_distance(point)
+            if distance < min_distance:
+                nearest = i
+                min_distance = distance
+        return nearest
+
+    def find_polygon_by_vertex(self, point):
+        """
+        Find the polygon with the vertex nearest to a point.
+        Return the index of the nearest polygon.
+        """
+        nearest = 0
+        min_distance = self.polygons[nearest].vertex_distance(point)
+        for i in range(1, len(self.polygons)):
+            distance = self.polygons[i].vertex_distance(point)
+            if distance < min_distance:
+                nearest = i
+                min_distance = distance
+        return nearest
 
 
 ################################################################################
