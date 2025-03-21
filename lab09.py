@@ -3,6 +3,8 @@
 import math
 
 
+################################################################################
+
 class Point:
     coordinates = tuple()  # tuple with X and Y coordinates.
 
@@ -14,8 +16,11 @@ class Point:
         """
         Euclidean distance between points.
         """
-        return math.sqrt(sum((b - a)**2 for a, b in zip(self.coordinates, other.coordinates)))
+        return math.sqrt(sum(
+            (b-a)**2 for a, b in zip(self.coordinates, other.coordinates)))
 
+
+################################################################################
 
 class Line:
     points = tuple()  # tuple with 2 points
@@ -28,7 +33,7 @@ class Line:
 
     def distance(self, point):
         """
-        See Distance from a point to a line: [Line defined by two points](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
+        See [Distance from a point to a line: Line defined by two points](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
         """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
@@ -39,6 +44,8 @@ class Line:
         numerator = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
         return numerator / self.length
 
+
+################################################################################
 
 class LineSegment(Line):
     def distance(self, point):
@@ -57,6 +64,8 @@ class LineSegment(Line):
             return Line.distance(self, point)
 
 
+################################################################################
+
 class Polygon:
     vertices = list()  # ordered list of vertices
     edges = list()  # ordered list of edges
@@ -74,6 +83,8 @@ class Polygon:
     def edge_distance(self, point):
         return min(e.distance(point) for e in self.edges)
 
+
+################################################################################
 
 def test():
     p1 = Point((1.0, 2.0))
@@ -112,12 +123,12 @@ def test():
     assert math.isclose(s2.distance(p5), l2.distance(p5))
     assert math.isclose(s2.distance(p6), p4.distance(p6))
 
-    square = Polygon(
-        [Point((0.0, 0.0)),
-         Point((2.0, 0.0)),
-         Point((2.0, 2.0)),
-         Point((0.0, 2.0))])
-    
+    square = Polygon((
+        Point((0.0, 0.0)),
+        Point((2.0, 0.0)),
+        Point((2.0, 2.0)),
+        Point((0.0, 2.0))))
+
     assert math.isclose(square.vertex_distance(p1), 1.0)
     assert math.isclose(square.vertex_distance(p2), math.sqrt(5.0))
     assert math.isclose(square.vertex_distance(p3), math.sqrt(5.0))
