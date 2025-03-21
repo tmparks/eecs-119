@@ -12,6 +12,9 @@ class Point:
         assert len(coordinates) == 2, 'a point must have exactly 2 coordinates'
         self.coordinates = tuple(coordinates)
 
+    def __eq__(self, other):
+        return self.coordinates == other.coordinates
+
     def distance(self, other):
         """
         Euclidean distance between points.
@@ -72,19 +75,46 @@ class Polygon:
 
     def __init__(self, vertices):
         self.vertices = list(vertices)
-        self.edges = list(LineSegment((
-            self.vertices[i],
-            self.vertices[(i+1) % len(vertices)]))
-            for i in range(len(vertices)))
+        self.edges = list()
+
+    def __eq__(self, other):
+        return (len(self.vertices) == len(other.vertices)
+                and all(a == b for a, b in zip(self.vertices, other.vertices)))
+
+    def add(self, point):
+        self.vertices.append(point)
+        self.edges.clear()
+
+    def delete(self, point):
+        self.vertices.remove(point)
+        self.edges.clear()
 
     def vertex_distance(self, point):
         return min(v.distance(point) for v in self.vertices)
 
     def edge_distance(self, point):
+        if len(self.edges) == 0:
+            self.edges = list(LineSegment((
+                self.vertices[i],
+                self.vertices[(i+1) % len(self.vertices)]))
+                for i in range(len(self.vertices)))
         return min(e.distance(point) for e in self.edges)
 
 
 ################################################################################
+
+class Scene:
+    polygons = list()  # ordered list of polygons
+
+    def add(self, polygon):
+        self.polygons += polygon
+
+    def delete(self, polygon):
+        self.polygons.remove(polygon)
+
+
+################################################################################
+
 
 def test():
     p1 = Point((1.0, 2.0))
@@ -142,5 +172,6 @@ def test():
     assert math.isclose(square.edge_distance(p4), 1.0)
     assert math.isclose(square.edge_distance(p5), math.sqrt(25.0))
     assert math.isclose(square.edge_distance(p6), 3.0)
+
 
 test()
