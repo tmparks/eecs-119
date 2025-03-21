@@ -36,7 +36,7 @@ class Line:
 
     def distance(self, point):
         """
-        See [Distance from a point to a line: Line defined by two points](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
+        [Distance from a point to a line: Line defined by two points](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
         """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
@@ -66,6 +66,21 @@ class LineSegment(Line):
         else:
             return Line.distance(self, point)
 
+    def intersects(self, point):
+        """
+        Determine wether or not a semi-infinte horizonal ray
+        intersects the line segment.
+        [Algorithm 112: Position of point relative to polygon](https://doi.org/10.1145/368637.368653)
+        """
+        x0 = point.coordinates[0]
+        y0 = point.coordinates[1]
+        x1 = self.points[0].coordinates[0]
+        y1 = self.points[0].coordinates[1]
+        x2 = self.points[1].coordinates[0]
+        y2 = self.points[1].coordinates[1]
+        return (((y1 <= y0) == (y0 < y2))
+                and (((x0-x1) - (y0-y1)*(x2-x1)/(y2-y1)) < 0))
+
 
 ################################################################################
 
@@ -76,6 +91,13 @@ class Polygon:
     def __init__(self, vertices):
         self._vertices = list(vertices)
         self._edges = list()
+
+    def _init_edges(self):
+        if len(self._edges) == 0:
+            self._edges = list(LineSegment((
+                self._vertices[i-1],
+                self._vertices[i]))
+                for i in range(len(self._vertices)))
 
     def __eq__(self, other):
         """
@@ -104,7 +126,16 @@ class Polygon:
         self._vertices.pop(index)
         self._edges.clear()
 
-    def find_vertex(self, point):
+    def contains(self, point):
+        """
+        [Point in polygon](https://en.wikipedia.org/wiki/Point_in_polygon)
+        [Algorithm 112: Position of point relative to polygon](https://doi.org/10.1145/368637.368653)
+        """
+        self._init_edges()
+        count = sum(int(e.intersects(point)) for e in self._edges)
+        return (count % 2) == 1  # odd number of intersections
+
+    def nearest_vertex(self, point):
         """
         Find the vertex nearest to a point.
         Return the index of the nearest vertex.
@@ -127,15 +158,14 @@ class Polygon:
     def edge_distance(self, point):
         """
         Find the distance from a point to the nearest edge.
+        The distance is zero for points contained within the polygon.
         """
-        if len(self._edges) == 0:
-            self._edges = list(LineSegment((
-                self._vertices[i],
-                self._vertices[i+1]))
-                for i in range(len(self._vertices)-1))
-            self._edges.append(LineSegment(
-                (self._vertices[-1], self._vertices[0])))
-        return min(e.distance(point) for e in self._edges)
+        self._init_edges()
+        distance = 0.0
+        if not self.contains(point):
+            distance = min(e.distance(point) for e in self._edges)
+        return distance
+
 
 
 ################################################################################
@@ -172,7 +202,7 @@ class Scene:
         if self.polygons[nearest_polygon].size() <= 3:
             self.polygons.pop(nearest_polygon)
         else:
-            nearest_vertex = self.polygons[nearest_polygon].find_vertex(point)
+            nearest_vertex = self.polygons[nearest_polygon].nearest_vertex(point)
             self.polygons[nearest_polygon].delete(nearest_vertex)
 
     def find_polygon_by_edge(self, point):
