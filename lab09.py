@@ -89,6 +89,7 @@ class Polygon:
     _edges = list()     # ordered list of edges, lazily evaluated
 
     def __init__(self, vertices):
+        assert len(vertices) >= 3, 'a polygon must have 3 or more vertices'
         self._vertices = list(vertices)
         self._edges = list()
 
@@ -122,8 +123,11 @@ class Polygon:
     def delete(self, index):
         """
         Delete a vertex from the polygon.
+        If fewer than 3 vertices remain, delete all vertices.
         """
         self._vertices.pop(index)
+        if len(self._vertices) < 3:
+            self._vertices.clear()
         self._edges.clear()
 
     def contains(self, point):
@@ -167,7 +171,6 @@ class Polygon:
         return distance
 
 
-
 ################################################################################
 
 class Scene:
@@ -199,11 +202,10 @@ class Scene:
         Delete the polygon if it has fewer than 3 remaining vertices.
         """
         nearest_polygon = self.find_polygon_by_vertex(point)
-        if self.polygons[nearest_polygon].size() <= 3:
+        nearest_vertex = self.polygons[nearest_polygon].nearest_vertex(point)
+        self.polygons[nearest_polygon].delete(nearest_vertex)
+        if self.polygons[nearest_polygon].size() < 3:
             self.polygons.pop(nearest_polygon)
-        else:
-            nearest_vertex = self.polygons[nearest_polygon].nearest_vertex(point)
-            self.polygons[nearest_polygon].delete(nearest_vertex)
 
     def find_polygon_by_edge(self, point):
         """
@@ -236,43 +238,42 @@ class Scene:
 
 ################################################################################
 
-
 def test():
-    p1 = Point((1.0, 2.0))
-    p2 = Point((3.0, 4.0))
-    p3 = Point((1.0, 4.0))
-    p4 = Point((3.0, 2.0))
-    p5 = Point((5.0, 6.0))
-    p6 = Point((5.0, 0.0))
+    pt1 = Point((1.0, 2.0))
+    pt2 = Point((3.0, 4.0))
+    pt3 = Point((1.0, 4.0))
+    pt4 = Point((3.0, 2.0))
+    pt5 = Point((5.0, 6.0))
+    pt6 = Point((5.0, 0.0))
 
-    assert math.isclose(p1.distance(p2), math.sqrt(8.0))
-    assert math.isclose(p2.distance(p3), 2.0)
-    assert math.isclose(p3.distance(p4), math.sqrt(8.0))
-    assert math.isclose(p4.distance(p5), math.sqrt(20.0))
-    assert math.isclose(p5.distance(p6), 6.0)
+    assert math.isclose(pt1.distance(pt2), math.sqrt(8.0))
+    assert math.isclose(pt2.distance(pt3), 2.0)
+    assert math.isclose(pt3.distance(pt4), math.sqrt(8.0))
+    assert math.isclose(pt4.distance(pt5), math.sqrt(20.0))
+    assert math.isclose(pt5.distance(pt6), 6.0)
 
-    l1 = Line((p1, p2))
-    l2 = Line((p3, p4))
+    ln1 = Line((pt1, pt2))
+    ln2 = Line((pt3, pt4))
 
-    assert math.isclose(l1.distance(p5), 0)
-    assert math.isclose(l2.distance(p6), 0)
+    assert math.isclose(ln1.distance(pt5), 0)
+    assert math.isclose(ln2.distance(pt6), 0)
 
-    s1 = LineSegment(l1.points)
-    s2 = LineSegment(l2.points)
+    sg1 = LineSegment(ln1.points)
+    sg2 = LineSegment(ln2.points)
 
-    assert math.isclose(s1.distance(p1), 0.0)
-    assert math.isclose(s1.distance(p2), 0.0)
-    assert math.isclose(s1.distance(p3), l1.distance(p3))
-    assert math.isclose(s1.distance(p4), l1.distance(p4))
-    assert math.isclose(s1.distance(p5), p2.distance(p5))
-    assert math.isclose(s1.distance(p6), l1.distance(p6))
+    assert math.isclose(sg1.distance(pt1), 0.0)
+    assert math.isclose(sg1.distance(pt2), 0.0)
+    assert math.isclose(sg1.distance(pt3), ln1.distance(pt3))
+    assert math.isclose(sg1.distance(pt4), ln1.distance(pt4))
+    assert math.isclose(sg1.distance(pt5), pt2.distance(pt5))
+    assert math.isclose(sg1.distance(pt6), ln1.distance(pt6))
 
-    assert math.isclose(s2.distance(p1), l2.distance(p1))
-    assert math.isclose(s2.distance(p2), l2.distance(p2))
-    assert math.isclose(s2.distance(p3), 0.0)
-    assert math.isclose(s2.distance(p4), 0.0)
-    assert math.isclose(s2.distance(p5), l2.distance(p5))
-    assert math.isclose(s2.distance(p6), p4.distance(p6))
+    assert math.isclose(sg2.distance(pt1), ln2.distance(pt1))
+    assert math.isclose(sg2.distance(pt2), ln2.distance(pt2))
+    assert math.isclose(sg2.distance(pt3), 0.0)
+    assert math.isclose(sg2.distance(pt4), 0.0)
+    assert math.isclose(sg2.distance(pt5), ln2.distance(pt5))
+    assert math.isclose(sg2.distance(pt6), pt4.distance(pt6))
 
     square = Polygon((
         Point((0.0, 0.0)),
@@ -280,19 +281,27 @@ def test():
         Point((2.0, 2.0)),
         Point((0.0, 2.0))))
 
-    assert math.isclose(square.vertex_distance(p1), 1.0)
-    assert math.isclose(square.vertex_distance(p2), math.sqrt(5.0))
-    assert math.isclose(square.vertex_distance(p3), math.sqrt(5.0))
-    assert math.isclose(square.vertex_distance(p4), 1.0)
-    assert math.isclose(square.vertex_distance(p5), math.sqrt(25.0))
-    assert math.isclose(square.vertex_distance(p6), 3.0)
+    assert math.isclose(square.vertex_distance(pt1), 1.0)
+    assert math.isclose(square.vertex_distance(pt2), math.sqrt(5.0))
+    assert math.isclose(square.vertex_distance(pt3), math.sqrt(5.0))
+    assert math.isclose(square.vertex_distance(pt4), 1.0)
+    assert math.isclose(square.vertex_distance(pt5), math.sqrt(25.0))
+    assert math.isclose(square.vertex_distance(pt6), 3.0)
 
-    assert math.isclose(square.edge_distance(p1), 0.0)
-    assert math.isclose(square.edge_distance(p2), math.sqrt(5.0))
-    assert math.isclose(square.edge_distance(p3), 2.0)
-    assert math.isclose(square.edge_distance(p4), 1.0)
-    assert math.isclose(square.edge_distance(p5), math.sqrt(25.0))
-    assert math.isclose(square.edge_distance(p6), 3.0)
+    assert math.isclose(square.edge_distance(pt1), 0.0)
+    assert math.isclose(square.edge_distance(pt2), math.sqrt(5.0))
+    assert math.isclose(square.edge_distance(pt3), 2.0)
+    assert math.isclose(square.edge_distance(pt4), 1.0)
+    assert math.isclose(square.edge_distance(pt5), math.sqrt(25.0))
+    assert math.isclose(square.edge_distance(pt6), 3.0)
+
+    assert not square.contains(pt1) # on edge
+    assert not square.contains(pt2) # outside
+    assert not square.contains(pt3) # outside
+    assert not square.contains(pt4) # outside
+    assert not square.contains(pt5) # outside
+    assert not square.contains(pt6) # outside
+    assert square.contains(Point((1.0, 1.0))) # in center
 
 
 test()
