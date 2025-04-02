@@ -1,0 +1,42 @@
+A 3    1  2    0  0    2  0                         # triangle
+A 6    0  1   -1  2   -2  2   -3  1   -2  0   -1  0 # hexagon
+A 4   -1 -1    1 -1    1  1   -1  1                 # overlapping square
+# expect 3 polygons
+L *
+# expect 1 polygon of size=3
+L 3
+# expect 13 vertices
+l
+# excpect 3 polygons
+C *
+# expect 1 polygon of size=4
+C 4
+# expect square (contains)
+F 0.0 0.1
+# expect triangle (nearest vertex)
+f 0.0 0.1
+# add vertex to triangle
+a 3 2
+# expect 2 polygons of size=4
+C 4
+# delete vertex from square
+d -1.1 -1.1
+# expect 1 polygon of size=3
+C 3
+# delete another vertex
+d 1.1 -1.1
+# expect 2 polygons
+L *
+# delete the hexagon
+D -3 0
+# expect 1 polygon
+L *
+# delete the last polygon
+D 0 0
+# expect 0 polygons
+L *
+h
+# unknown command
+z
+q
+# should not get this far

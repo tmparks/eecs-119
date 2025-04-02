@@ -15,6 +15,9 @@ class Point:
     def __eq__(self, other):
         return self.coordinates == other.coordinates
 
+    def __str__(self):
+        return self.coordinates.__str__()
+
     def distance(self, other):
         """
         Euclidean distance between points.
@@ -107,11 +110,20 @@ class Polygon:
         return (len(self._vertices) == len(other._vertices)
                 and all(a == b for a, b in zip(self._vertices, other._vertices)))
 
-    def size(self):
+    def __getitem__(self, index):
+        """
+        Get a vertex.
+        """
+        return self._vertices[index]
+
+    def __len__(self):
         """
         Get the number of vertices.
         """
         return len(self._vertices)
+
+    def __str__(self):
+        return str(len(self._vertices)) + ': ' + ', '.join(str(v) for v in self._vertices)
 
     def add(self, point):
         """
@@ -120,12 +132,12 @@ class Polygon:
         self._vertices.append(point)
         self._edges.clear()
 
-    def delete(self, index):
+    def __delitem__(self, index):
         """
         Delete a vertex from the polygon.
         If fewer than 3 vertices remain, delete all vertices.
         """
-        self._vertices.pop(index)
+        del self._vertices[index]
         if len(self._vertices) < 3:
             self._vertices.clear()
         self._edges.clear()
@@ -144,6 +156,7 @@ class Polygon:
         Find the vertex nearest to a point.
         Return the index of the nearest vertex.
         """
+        assert len(self._vertices) > 0, 'polygon is empty'
         nearest = 0
         min_distance = self._vertices[nearest].distance(point)
         for i in range(1, len(self._vertices)):
@@ -157,6 +170,7 @@ class Polygon:
         """
         Find the distance from a point to the nearest vertex.
         """
+        assert len(self._vertices) > 0, 'polygon is empty'
         return min(v.distance(point) for v in self._vertices)
 
     def edge_distance(self, point):
@@ -164,6 +178,7 @@ class Polygon:
         Find the distance from a point to the nearest edge.
         The distance is zero for points contained within the polygon.
         """
+        assert len(self._vertices) > 0, 'polygon is empty'
         self._init_edges()
         distance = 0.0
         if not self.contains(point):
@@ -194,7 +209,7 @@ class Scene:
         Delete the polygon nearest to a point.
         """
         nearest = self.find_polygon_by_edge(point)
-        self.polygons.pop(nearest)
+        del self.polygons[nearest]
 
     def delete_point(self, point):
         """
@@ -203,15 +218,16 @@ class Scene:
         """
         nearest_polygon = self.find_polygon_by_vertex(point)
         nearest_vertex = self.polygons[nearest_polygon].nearest_vertex(point)
-        self.polygons[nearest_polygon].delete(nearest_vertex)
-        if self.polygons[nearest_polygon].size() < 3:
-            self.polygons.pop(nearest_polygon)
+        del self.polygons[nearest_polygon][nearest_vertex]
+        if len(self.polygons[nearest_polygon]) < 3:
+            del self.polygons[nearest_polygon]
 
     def find_polygon_by_edge(self, point):
         """
         Find the polygon with the edge nearest to a point.
         Return the index of the nearest polygon.
         """
+        assert len(self.polygons) > 0, 'scene is empty'
         nearest = 0
         min_distance = self.polygons[nearest].edge_distance(point)
         for i in range(1, len(self.polygons)):
@@ -226,6 +242,7 @@ class Scene:
         Find the polygon with the vertex nearest to a point.
         Return the index of the nearest polygon.
         """
+        assert len(self.polygons) > 0, 'scene is empty'
         nearest = 0
         min_distance = self.polygons[nearest].vertex_distance(point)
         for i in range(1, len(self.polygons)):
@@ -237,6 +254,183 @@ class Scene:
 
 
 ################################################################################
+
+def add_polygon(scene, line):
+    """
+    Add a polygon to the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'A', 'invalid command'
+    n = int(next(words))
+    vertices = list()  # initially empty
+    for _ in range(n):
+        coordinates = (float(next(words)), float(next(words)))
+        vertices.append(Point(coordinates))
+    scene.add_polygon(Polygon(vertices))
+
+
+def add_point(scene, line):
+    """
+    Add a point to the polygon with the nearest vertex.
+    """
+    words = iter(line.split())
+    assert next(words) == 'a', 'invalid command'
+    coordinates = (float(next(words)), float(next(words)))
+    scene.add_point(Point(coordinates))
+
+
+def delete_polygon(scene, line):
+    """
+    Delete a polygon from the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'D', 'invalid command'
+    coordinates = (float(next(words)), float(next(words)))
+    scene.delete_polygon(Point(coordinates))
+
+
+def delete_point(scene, line):
+    """
+    Delete a vertex from from a polygon.
+    """
+    words = iter(line.split())
+    assert next(words) == 'd', 'invalid command'
+    coordinates = (float(next(words)), float(next(words)))
+    scene.delete_point(Point(coordinates))
+
+
+def find_polygon(scene, line):
+    """
+    Find a polygon in the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'F', 'invalid command'
+    coordinates = (float(next(words)), float(next(words)))
+    point = Point(coordinates)
+    nearest_polygon = scene.polygons[scene.find_polygon_by_edge(point)]
+    print('Point: {}'.format(point))
+    print('Nearest polygon: {}'.format(nearest_polygon))
+    print('Distance: {}'.format(
+        nearest_polygon.edge_distance(point)))
+
+
+def find_vertex(scene, line):
+    """
+    Find a vertex in the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'f', 'invalid command'
+    coordinates = (float(next(words)), float(next(words)))
+    point = Point(coordinates)
+    nearest_polygon = scene.polygons[scene.find_polygon_by_vertex(point)]
+    nearest_vertex = nearest_polygon[nearest_polygon.nearest_vertex(point)]
+    print('Point: {}'.format(point))
+    print('Polygon with nearest vertex: {}'.format(nearest_polygon))
+    print('Nearest vertex: {}'.format(nearest_vertex))
+    print('Distance: {}'.format(nearest_vertex.distance(point)))
+
+
+def list_polygons(scene, line):
+    """
+    List polygons in the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'L', 'invalid command'
+    word = next(words)
+    if word == '*':
+        print('There are {} polygons'.format(len(scene.polygons)))
+    else:
+        size = int(word)
+        print('There are {} polygons of size {}'.format(
+            sum(int(len(p) == size) for p in scene.polygons), size))
+
+def list_all_vertices(scene, line):
+    """
+    List all vertices in all polygons in the scene.
+    """
+    words = iter(line.split())
+    assert next(words) == 'l', 'invalid command'
+    print('There are {} vertices'.format(sum(len(p) for p in scene.polygons)))
+
+def list_vertices(scene, line):
+    """
+    List polygons and all their vertices.
+    """
+    words = iter(line.split())
+    assert next(words) == 'C', 'invalid command'
+    word = next(words)
+    if word == '*':
+        for p in scene.polygons:
+            print(p)
+    else:
+        size = int(word)
+        for p in scene.polygons:
+            if len(p) == size:
+                print(p)
+
+
+def help():
+    print('Available commands:')
+    print('A n x1 y1 x2 y2 ... xn yn')
+    print('\tadd a polygon of n points, the points being (x1,y1), (x2,y2), ..., (xn,yn)')
+    print('a x1 y1')
+    print('\tadd the point (x1,y1) to the polygon with the nearest vertex (see f)')
+    print('D x1 y1')
+    print('\tdelete the polygon closest to the point (x1,y1) (see F)')
+    print('d x1 y1')
+    print('\tdelete the vertex nearest (x1,y1) from its polygon (see f)')
+    print('F x1 y1')
+    print('\tfind the polygon closest to the point (x1,y1)')
+    print('f x1 y1')
+    print('\tfind the vertex closest to the point(x1, y1)')
+    print('L n')
+    print('\tlist all polygons of n vertices')
+    print('L *')
+    print('\tlist all polygons')
+    print('l')
+    print('\tlist all vertices')
+    print('C n')
+    print('\tlist all polygons of n vertices and their vertices')
+    print('C *')
+    print('\tlist all polygons and their vertices')
+    print('h')
+    print('\tprint a list of commands')
+    print('q')
+    print('\texit')
+
+
+def read_commands(scene, file_name):
+    with open(file_name) as file:
+        for line in file:
+            if line.startswith('A'):
+                add_polygon(scene, line)
+            elif line.startswith('a'):
+                add_point(scene, line)
+            elif line.startswith('D'):
+                delete_polygon(scene, line)
+            elif line.startswith('d'):
+                delete_point(scene, line)
+            elif line.startswith('F'):
+                find_polygon(scene, line)
+            elif line.startswith('f'):
+                find_vertex(scene, line)
+            elif line.startswith('L'):
+                list_polygons(scene, line)
+            elif line.startswith('l'):
+                list_all_vertices(scene, line)
+            elif line.startswith('C'):
+                list_vertices(scene, line)
+            elif line.startswith('h'):
+                help()
+            elif line.startswith('q'):
+                print('Exiting...')
+                exit()
+            elif line.startswith('#'):
+                print(line, end='')  # print comment
+            else:
+                print('Unrecognized command: ' + line)
+                help()
+
 
 def test():
     pt1 = Point((1.0, 2.0))
@@ -295,13 +489,15 @@ def test():
     assert math.isclose(square.edge_distance(pt5), math.sqrt(25.0))
     assert math.isclose(square.edge_distance(pt6), 3.0)
 
-    assert not square.contains(pt1) # on edge
-    assert not square.contains(pt2) # outside
-    assert not square.contains(pt3) # outside
-    assert not square.contains(pt4) # outside
-    assert not square.contains(pt5) # outside
-    assert not square.contains(pt6) # outside
-    assert square.contains(Point((1.0, 1.0))) # in center
+    assert not square.contains(pt1)  # on edge
+    assert not square.contains(pt2)  # outside
+    assert not square.contains(pt3)  # outside
+    assert not square.contains(pt4)  # outside
+    assert not square.contains(pt5)  # outside
+    assert not square.contains(pt6)  # outside
+    assert square.contains(Point((1.0, 1.0)))  # in center
 
 
 test()
+s = Scene()
+read_commands(s, 'lab09.txt')
