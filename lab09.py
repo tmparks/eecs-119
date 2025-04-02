@@ -55,6 +55,9 @@ class Line:
 
 class LineSegment(Line):
     def distance(self, point):
+        """
+        [Distance from a point to a line: A vector projection proof](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof)
+        """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
         x1 = self.points[0].coordinates[0]
@@ -308,10 +311,9 @@ def find_polygon(scene, line):
     coordinates = (float(next(words)), float(next(words)))
     point = Point(coordinates)
     nearest_polygon = scene.polygons[scene.find_polygon_by_edge(point)]
-    print('Point: {}'.format(point))
-    print('Nearest polygon: {}'.format(nearest_polygon))
-    print('Distance: {}'.format(
-        nearest_polygon.edge_distance(point)))
+    print(f'Point: {point}')
+    print(f'Nearest polygon: {nearest_polygon}')
+    print(f'Distance: {nearest_polygon.edge_distance(point)}')
 
 
 def find_vertex(scene, line):
@@ -324,10 +326,10 @@ def find_vertex(scene, line):
     point = Point(coordinates)
     nearest_polygon = scene.polygons[scene.find_polygon_by_vertex(point)]
     nearest_vertex = nearest_polygon[nearest_polygon.nearest_vertex(point)]
-    print('Point: {}'.format(point))
-    print('Polygon with nearest vertex: {}'.format(nearest_polygon))
-    print('Nearest vertex: {}'.format(nearest_vertex))
-    print('Distance: {}'.format(nearest_vertex.distance(point)))
+    print(f'Point: {point}')
+    print(f'Polygon with nearest vertex: {nearest_polygon}')
+    print(f'Nearest vertex: {nearest_vertex}')
+    print(f'Distance: {nearest_vertex.distance(point)}')
 
 
 def list_polygons(scene, line):
@@ -338,11 +340,12 @@ def list_polygons(scene, line):
     assert next(words) == 'L', 'invalid command'
     word = next(words)
     if word == '*':
-        print('There are {} polygons'.format(len(scene.polygons)))
+        print(f'There are {len(scene.polygons)} polygons')
     else:
         size = int(word)
-        print('There are {} polygons of size {}'.format(
-            sum(int(len(p) == size) for p in scene.polygons), size))
+        print(
+            f'There are {sum(int(len(p) == size) for p in scene.polygons)} polygons of size {size}')
+
 
 def list_all_vertices(scene, line):
     """
@@ -350,7 +353,8 @@ def list_all_vertices(scene, line):
     """
     words = iter(line.split())
     assert next(words) == 'l', 'invalid command'
-    print('There are {} vertices'.format(sum(len(p) for p in scene.polygons)))
+    print(f'There are {sum(len(p) for p in scene.polygons)} vertices')
+
 
 def list_vertices(scene, line):
     """
@@ -369,7 +373,7 @@ def list_vertices(scene, line):
                 print(p)
 
 
-def help():
+def print_help():
     print('Available commands:')
     print('A n x1 y1 x2 y2 ... xn yn')
     print('\tadd a polygon of n points, the points being (x1,y1), (x2,y2), ..., (xn,yn)')
@@ -421,7 +425,7 @@ def read_commands(scene, file_name):
             elif line.startswith('C'):
                 list_vertices(scene, line)
             elif line.startswith('h'):
-                help()
+                print_help()
             elif line.startswith('q'):
                 print('Exiting...')
                 exit()
@@ -429,7 +433,7 @@ def read_commands(scene, file_name):
                 print(line, end='')  # print comment
             else:
                 print('Unrecognized command: ' + line)
-                help()
+                print_help()
 
 
 def test():
