@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+import collections
 import math
+
+City = collections.namedtuple('City', ['longitude', 'latitude', 'name'])
 
 
 def decimal_degrees(degrees, minutes):
@@ -17,15 +20,12 @@ def radians(degrees):
     return degrees * math.pi / 180.0
 
 
-def read_coordinates(file_name):
+def read_city_coordinates(file_name):
     """
     Read city coordinates from a file.
-    Returns a list of tuples
-      * longitude (radians)
-      * latitude (radians)
-      * city (string)
+    Returns a list of City tuples.
     """
-    coordinates = list()  # initially empty
+    result = list()  # initially empty
     with open(file_name) as file:
         # Skip heading (2 lines)
         next(file)
@@ -37,10 +37,31 @@ def read_coordinates(file_name):
                 float(words[0]), float(words[1])))
             latitude = radians(decimal_degrees(
                 float(words[2]), float(words[3])))
-            city = ' '.join(words[4:])
-            coordinates.append((longitude, latitude, city))
-    return coordinates
+            name = ' '.join(words[4:])
+            result.append(City(longitude, latitude, name))
+    return result
 
 
-for city in read_coordinates('lab10.txt'):
-    print(city)
+def distance(city1, city2):
+    """
+    Great circle distance between cities (miles).
+    Assumes that the earth is a sphere.
+    """
+    R = 3959.0  # mean radius of the earth
+    A = abs(city1.longitude - city2.longitude)
+    b = math.pi/2.0 - city1.latitude
+    c = math.pi/2.0 - city2.latitude
+    a = math.acos(math.cos(b) * math.cos(c)
+                  + math.sin(b) * math.sin(c) * math.cos(A))
+    return a * R
+
+
+def test():
+    cities = read_city_coordinates('lab10.txt')
+    assert (134 == round(distance(
+        cities[0], cities[1]))), f'{cities[0].name} to {cities[1].name}'
+    assert (2755 == round(distance(
+        cities[0], cities[13]))), f'{cities[0].name} to {cities[13].name}'
+
+
+test()
