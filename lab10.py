@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
+"""
+Programing Assignment 10: The Traveling Salesman Problem
+"""
 
 import collections
 import math
+import random
 
 City = collections.namedtuple('City', ['longitude', 'latitude', 'name'])
 
@@ -26,7 +30,7 @@ def read_city_coordinates(file_name):
     Returns a list of City tuples.
     """
     result = list()  # initially empty
-    with open(file_name) as file:
+    with open(file_name, encoding="utf-8") as file:
         # Skip heading (2 lines)
         next(file)
         next(file)
@@ -45,9 +49,9 @@ def read_city_coordinates(file_name):
 def distance(city1, city2):
     """
     Great circle distance between cities (miles).
-    Assumes that the earth is a sphere.
     """
-    R = 3959.0  # mean radius of the earth
+    # pylint: disable=invalid-name
+    R = 3959.0  # mean radius of a spherical earth
     A = abs(city1.longitude - city2.longitude)
     b = math.pi/2.0 - city1.latitude
     c = math.pi/2.0 - city2.latitude
@@ -58,32 +62,51 @@ def distance(city1, city2):
 
 def distance_matrix(cities):
     """
-    Fill NxN matrix with distances between all pairs of cities.
+    Fill symmetric NxN matrix with distances between all pairs of cities.
     """
     result = [[0 for _ in cities] for _ in cities]
     for index1, city1 in enumerate(cities):
         for index2, city2 in enumerate(cities):
-            if index1 == index2:
-                result[index1][index2] = 0
+            if index1 < index2:
+                result[index1][index2] = round(distance(city1, city2))
+            elif index1 > index2:
+                result[index1][index2] = result[index2][index1]
             else:
-                d = round(distance(city1, city2))
-                result[index1][index2] = d
-                result[index2][index1] = d
+                result[index1][index2] = 0
+    return result
+
+
+def tour_length(tour, matrix):
+    """
+    Return the length of a tour.
+    """
+    result = 0
+    # pylint: disable-next=consider-using-enumerate
+    for i in range(len(tour)):
+        result += matrix[tour[i]][tour[i-1]]
     return result
 
 
 def test():
+    """
+    Test cases.
+    """
     cities = read_city_coordinates('lab10.txt')
-    subset = cities[:15]
+    subset = cities[:]
     matrix = distance_matrix(subset)
-    for row in matrix:
-        print(row)
-    assert len(subset) == len(matrix)
-    assert len(subset) == len(matrix[0])
+    # for row in matrix:
+    #     print(row)
     assert 134 == matrix[0][1], f'{cities[0].name} to {cities[1].name}'
     assert 134 == matrix[1][0], f'{cities[1].name} to {cities[0].name}'
     assert 2755 == matrix[0][13], f'{cities[0].name} to {cities[13].name}'
     assert 2755 == matrix[13][0], f'{cities[13].name} to {cities[0].name}'
+    minima = [min(d for d in row if d > 0) for row in matrix]
+    maxima = [max(row) for row in matrix]
+    print(f'Lower bound: {sum(minima)}')
+    print(f'Upper bound: {sum(maxima)}')
+    tour = list(range(len(subset)))
+    random.shuffle(tour)
+    print(f'Random tour: {tour_length(tour, matrix)} miles')
 
 
 test()
