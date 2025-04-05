@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: enable=useless-suppression
 """
 Programing Assignment 10: The Traveling Salesman Problem
 """
@@ -62,7 +63,7 @@ def distance(city1, city2):
 
 def distance_matrix(cities):
     """
-    Fill symmetric NxN matrix with distances between all pairs of cities.
+    Symmetric NxN matrix with distances between all pairs of cities.
     """
     result = [[0 for _ in cities] for _ in cities]
     for index1, city1 in enumerate(cities):
@@ -78,7 +79,7 @@ def distance_matrix(cities):
 
 def tour_length(tour, matrix):
     """
-    Return the length of a tour.
+    Length of a tour.
     """
     result = 0
     # pylint: disable-next=consider-using-enumerate
@@ -87,15 +88,30 @@ def tour_length(tour, matrix):
     return result
 
 
+def greedy(tour, matrix):
+    """
+    Greedy algorithm chooses best remaining city for each next link.
+    """
+    for index1 in range(1, len(tour)-1):
+        current = index1-1  # current city
+        best = index1       # best next city
+        row = matrix[tour[current]]  # current row of distance matrix
+        for index2 in range(index1+1, len(tour)):
+            if row[tour[index2]] < row[tour[best]]:
+                best = index2
+        tour[index1], tour[best] = tour[best], tour[index1]  # swap
+    return tour
+
+
 def test():
     """
     Test cases.
     """
     cities = read_city_coordinates('lab10.txt')
-    subset = cities[:]
+    subset = cities[:15]
     matrix = distance_matrix(subset)
-    # for row in matrix:
-    #     print(row)
+    for row in enumerate(matrix):
+        print(row)
     assert 134 == matrix[0][1], f'{cities[0].name} to {cities[1].name}'
     assert 134 == matrix[1][0], f'{cities[1].name} to {cities[0].name}'
     assert 2755 == matrix[0][13], f'{cities[0].name} to {cities[13].name}'
@@ -106,7 +122,10 @@ def test():
     print(f'Upper bound: {sum(maxima)}')
     tour = list(range(len(subset)))
     random.shuffle(tour)
-    print(f'Random tour: {tour_length(tour, matrix)} miles')
+    print(f'Random tour: {tour_length(tour, matrix)} miles {tour}')
+    tour = greedy(tour, matrix)
+    print(f'Greedy tour: {tour_length(tour, matrix)} miles {tour}')
 
 
+# random.seed(1)
 test()
