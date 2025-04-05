@@ -56,12 +56,34 @@ def distance(city1, city2):
     return a * R
 
 
+def distance_matrix(cities):
+    """
+    Fill NxN matrix with distances between all pairs of cities.
+    """
+    result = [[0 for _ in cities] for _ in cities]
+    for index1, city1 in enumerate(cities):
+        for index2, city2 in enumerate(cities):
+            if index1 == index2:
+                result[index1][index2] = 0
+            else:
+                d = round(distance(city1, city2))
+                result[index1][index2] = d
+                result[index2][index1] = d
+    return result
+
+
 def test():
     cities = read_city_coordinates('lab10.txt')
-    assert (134 == round(distance(
-        cities[0], cities[1]))), f'{cities[0].name} to {cities[1].name}'
-    assert (2755 == round(distance(
-        cities[0], cities[13]))), f'{cities[0].name} to {cities[13].name}'
+    subset = cities[:15]
+    matrix = distance_matrix(subset)
+    for row in matrix:
+        print(row)
+    assert len(subset) == len(matrix)
+    assert len(subset) == len(matrix[0])
+    assert 134 == matrix[0][1], f'{cities[0].name} to {cities[1].name}'
+    assert 134 == matrix[1][0], f'{cities[1].name} to {cities[0].name}'
+    assert 2755 == matrix[0][13], f'{cities[0].name} to {cities[13].name}'
+    assert 2755 == matrix[13][0], f'{cities[13].name} to {cities[0].name}'
 
 
 test()
