@@ -103,6 +103,48 @@ def greedy(tour, matrix):
     return tour
 
 
+def city2opt(tour, matrix):
+    """
+    Improve a tour by swapping pairs of cities.
+    Compare distances before an after each possible swap.
+    Continue until no improvement is possible.
+    """
+    improved = True
+    while improved:
+        improved = False
+        for index1 in range(len(tour)-1):
+            p1 = tour[index1-2]  # previous city
+            c1 = tour[index1-1]  # current city
+            n1 = tour[index1]    # next city
+            d1 = matrix[c1]      # distances
+            for index2 in range(index1+1, len(tour)):
+                p2 = tour[index2-2]  # previous city
+                c2 = tour[index2-1]  # current city
+                n2 = tour[index2]    # next city
+                d2 = matrix[c2]      # distances
+                if c1 == p2:
+                    # before: p1, c1, c2, n2
+                    # after:  p1, c2, c1, n2
+                    before = d1[p1] + d1[c2] + d2[n2]
+                    after = d2[p1] + d2[c1] + d1[n2]
+                elif c2 == p1:
+                    # before: p2, c2, c1, n1
+                    # after:  p2, c1, c2, n1
+                    before = d2[p2] + d2[c1] + d1[n1]
+                    after = d1[p2] + d1[c2] + d2[n1]
+                else:
+                    # before: p1, c1, n1 ... p2, c2, n2
+                    # after:  p1, c2, n1 ... p2, c1, n2
+                    before = d1[p1] + d1[n1] + d2[p2] + d2[n2]
+                    after = d2[p1] + d2[n1] + d1[p2] + d1[n2]
+                if after < before:
+                    (tour[index1-1], tour[index2-1]) = (c2, c1)  # swap
+                    improved = True
+                    c1 = tour[index1-1]
+                    d1 = matrix[c1]
+    return tour
+
+
 def test():
     """
     Test cases.
@@ -122,9 +164,11 @@ def test():
     print(f'Upper bound: {sum(maxima)}')
     tour = list(range(len(subset)))
     random.shuffle(tour)
-    print(f'Random tour: {tour_length(tour, matrix)} miles {tour}')
+    print(f'random: {tour_length(tour, matrix)} miles {tour}')
     tour = greedy(tour, matrix)
-    print(f'Greedy tour: {tour_length(tour, matrix)} miles {tour}')
+    print(f'greedy: {tour_length(tour, matrix)} miles {tour}')
+    tour = city2opt(tour, matrix)
+    print(f'city2opt: {tour_length(tour, matrix)} miles {tour}')
 
 
 # random.seed(1)
