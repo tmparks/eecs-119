@@ -56,8 +56,9 @@ def distance(city1, city2):
     A = abs(city1.longitude - city2.longitude)
     b = math.pi/2.0 - city1.latitude
     c = math.pi/2.0 - city2.latitude
-    a = math.acos(math.cos(b) * math.cos(c)
-                  + math.sin(b) * math.sin(c) * math.cos(A))
+    a = math.acos(
+        math.cos(b) * math.cos(c)
+        + math.sin(b) * math.sin(c) * math.cos(A))
     return a * R
 
 
@@ -81,11 +82,7 @@ def tour_length(tour, matrix):
     """
     Length of a tour.
     """
-    result = 0
-    # pylint: disable-next=consider-using-enumerate
-    for i in range(len(tour)):
-        result += matrix[tour[i]][tour[i-1]]
-    return result
+    return sum(matrix[tour[i]][tour[i-1]] for i in range(len(tour)))
 
 
 def greedy(tour, matrix):
@@ -103,7 +100,7 @@ def greedy(tour, matrix):
     return tour
 
 
-def city2opt(tour, matrix):
+def city_2_opt(tour, matrix):
     """
     Improve a tour by swapping pairs of cities.
     Compare distances before an after each possible swap.
@@ -145,6 +142,36 @@ def city2opt(tour, matrix):
     return tour
 
 
+def link_2_opt(tour, matrix):
+    """
+    Improve a tour by swapping pairs of links.
+    Compare distances before and after each possible swap.
+    Continue until no improvement is possible.
+    """
+    improved = True
+    while improved:
+        improved = False
+        for index1 in range(len(tour)-2):
+            p1 = tour[index1-1]  # previous city
+            c1 = tour[index1]    # current city
+            d1 = matrix[c1]      # distances
+            for index2 in range(index1+2, len(tour)):
+                c2 = tour[index2-1]  # current city
+                n2 = tour[index2]    # next city
+                d2 = matrix[c2]      # distances
+                # before: p1, c1 ... c2, n2
+                # after:  p1, c2 ... c1, n2
+                before = d1[p1] + d2[n2]
+                after = d2[p1] + d1[n2]
+                if after < before:
+                    # reverse the section of the tour between the links
+                    tour[index1:index2] = reversed(tour[index1:index2])
+                    improved = True
+                    c1 = tour[index1]
+                    d1 = matrix[c1]
+    return tour
+
+
 def test():
     """
     Test cases.
@@ -167,8 +194,10 @@ def test():
     print(f'random: {tour_length(tour, matrix)} miles {tour}')
     tour = greedy(tour, matrix)
     print(f'greedy: {tour_length(tour, matrix)} miles {tour}')
-    tour = city2opt(tour, matrix)
-    print(f'city2opt: {tour_length(tour, matrix)} miles {tour}')
+    tour = city_2_opt(tour, matrix)
+    print(f'city_2_opt: {tour_length(tour, matrix)} miles {tour}')
+    tour = link_2_opt(tour, matrix)
+    print(f'link_2_opt: {tour_length(tour, matrix)} miles {tour}')
 
 
 # random.seed(1)
