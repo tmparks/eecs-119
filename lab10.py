@@ -67,14 +67,14 @@ def distance_matrix(cities):
     Symmetric NxN matrix with distances between all pairs of cities.
     """
     result = [[0 for _ in cities] for _ in cities]
-    for index1, city1 in enumerate(cities):
-        for index2, city2 in enumerate(cities):
-            if index1 < index2:
-                result[index1][index2] = round(distance(city1, city2))
-            elif index1 > index2:
-                result[index1][index2] = result[index2][index1]
+    for i, city_i in enumerate(cities):
+        for j, city_j in enumerate(cities):
+            if i < j:
+                result[i][j] = round(distance(city_i, city_j))
+            elif i > j:
+                result[i][j] = result[j][i]
             else:
-                result[index1][index2] = 0
+                result[i][j] = 0
     return result
 
 
@@ -111,11 +111,11 @@ def city_2_opt(tour, dist):
         improved = False
         for i in range(len(tour)-1):
             p1 = tour[i-2]  # previous city
-            c1 = tour[i-1]  # current city
+            c1 = tour[i-1]
             n1 = tour[i]    # next city
             for j in range(i+1, len(tour)):
                 p2 = tour[j-2]  # previous city
-                c2 = tour[j-1]  # current city
+                c2 = tour[j-1]
                 n2 = tour[j]    # next city
                 if c1 == p2:
                     before = dist[p1][c1] + dist[c1][c2] + dist[c2][n2]
@@ -124,10 +124,8 @@ def city_2_opt(tour, dist):
                     before = dist[p2][c2] + dist[c2][c1] + dist[c1][n1]
                     after = dist[p2][c1] + dist[c1][c2] + dist[c2][n1]
                 else:
-                    before = dist[p1][c1] + dist[c1][n1] + \
-                        dist[p2][c2] + dist[c2][n2]
-                    after = dist[p1][c2] + dist[c2][n1] + \
-                        dist[p2][c1] + dist[c1][n2]
+                    before = dist[p1][c1] + dist[c1][n1] + dist[p2][c2] + dist[c2][n2]
+                    after = dist[p1][c2] + dist[c2][n1] + dist[p2][c1] + dist[c1][n2]
                 if after < before:
                     (tour[i-1], tour[j-1]) = (c2, c1)  # swap
                     improved = True
@@ -202,12 +200,15 @@ def link_3_opt(tour, dist):
                     elif after4 == best:
                         tour[i:k] = tour[j:k] + tour[i:j]
                     elif after5 == best:
-                        tour[i:k] = tour[j:k] + list(reversed(tour[i:j]))
+                        tour[i:j] = reversed(tour[i:j])
+                        tour[i:k] = tour[j:k] + tour[i:j]  # swap segments
                     elif after6 == best:
-                        tour[i:k] = list(reversed(tour[j:k])) + tour[i:j]
+                        tour[j:k] = reversed(tour[j:k])
+                        tour[i:k] = tour[j:k] + tour[i:j]  # swap segments
                     elif after7 == best:
-                        tour[i:k] = list(reversed(tour[j:k])) \
-                            + list(reversed(tour[i:j]))
+                        tour[i:j] = reversed(tour[i:j])
+                        tour[j:k] = reversed(tour[j:k])
+                        tour[i:k] = tour[j:k] + tour[i:j]  # swap segments
                     else:
                         pass  # no change (should not get here!)
                     # If we get this far, the tour had been improved
