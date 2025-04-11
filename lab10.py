@@ -124,8 +124,10 @@ def city_2_opt(tour, dist):
                     before = dist[p2][c2] + dist[c2][c1] + dist[c1][n1]
                     after = dist[p2][c1] + dist[c1][c2] + dist[c2][n1]
                 else:
-                    before = dist[p1][c1] + dist[c1][n1] + dist[p2][c2] + dist[c2][n2]
-                    after = dist[p1][c2] + dist[c2][n1] + dist[p2][c1] + dist[c1][n2]
+                    before = (dist[p1][c1] + dist[c1][n1]
+                              + dist[p2][c2] + dist[c2][n2])
+                    after = (dist[p1][c2] + dist[c2][n1]
+                             + dist[p2][c1] + dist[c1][n2])
                 if after < before:
                     (tour[i-1], tour[j-1]) = (c2, c1)  # swap
                     improved = True
