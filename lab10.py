@@ -78,29 +78,29 @@ def distance_matrix(cities):
     return result
 
 
-def tour_length(tour, matrix):
+def tour_length(tour, dist):
     """
     Length of a tour.
     """
-    return sum(matrix[tour[i]][tour[i-1]] for i in range(len(tour)))
+    return sum(dist[tour[i]][tour[i-1]] for i in range(len(tour)))
 
 
-def greedy(tour, matrix):
+def nearest_neighbor(tour, dist):
     """
-    Greedy algorithm chooses best remaining city for each next link.
+    Greedy algorithm chooses nearest remaining neighbor for each next link.
     """
-    for index1 in range(1, len(tour)-1):
-        current = index1-1  # current city
-        best = index1       # best next city
-        row = matrix[tour[current]]  # current row of distance matrix
-        for index2 in range(index1+1, len(tour)):
-            if row[tour[index2]] < row[tour[best]]:
-                best = index2
-        tour[index1], tour[best] = tour[best], tour[index1]  # swap
+    for i in range(1, len(tour)-1):
+        p = tour[i-1]  # previous city
+        c1 = tour[i]
+        for j in range(i+1, len(tour)):
+            c2 = tour[j]
+            if dist[p][c2] < dist[p][c1]:
+                (tour[i], tour[j]) = (c2, c1)  # swap
+                c1 = tour[i]
     return tour
 
 
-def city_2_opt(tour, matrix):
+def city_2_opt(tour, dist):
     """
     Improve a tour by swapping pairs of cities.
     Compare distances before an after each possible swap.
@@ -109,40 +109,33 @@ def city_2_opt(tour, matrix):
     improved = True
     while improved:
         improved = False
-        for index1 in range(len(tour)-1):
-            p1 = tour[index1-2]  # previous city
-            c1 = tour[index1-1]  # current city
-            n1 = tour[index1]    # next city
-            d1 = matrix[c1]      # distances
-            for index2 in range(index1+1, len(tour)):
-                p2 = tour[index2-2]  # previous city
-                c2 = tour[index2-1]  # current city
-                n2 = tour[index2]    # next city
-                d2 = matrix[c2]      # distances
+        for i in range(len(tour)-1):
+            p1 = tour[i-2]  # previous city
+            c1 = tour[i-1]  # current city
+            n1 = tour[i]    # next city
+            for j in range(i+1, len(tour)):
+                p2 = tour[j-2]  # previous city
+                c2 = tour[j-1]  # current city
+                n2 = tour[j]    # next city
                 if c1 == p2:
-                    # before: p1, c1, c2, n2
-                    # after:  p1, c2, c1, n2
-                    before = d1[p1] + d1[c2] + d2[n2]
-                    after = d2[p1] + d2[c1] + d1[n2]
+                    before = dist[p1][c1] + dist[c1][c2] + dist[c2][n2]
+                    after = dist[p1][c2] + dist[c2][c1] + dist[c1][n2]
                 elif c2 == p1:
-                    # before: p2, c2, c1, n1
-                    # after:  p2, c1, c2, n1
-                    before = d2[p2] + d2[c1] + d1[n1]
-                    after = d1[p2] + d1[c2] + d2[n1]
+                    before = dist[p2][c2] + dist[c2][c1] + dist[c1][n1]
+                    after = dist[p2][c1] + dist[c1][c2] + dist[c2][n1]
                 else:
-                    # before: p1, c1, n1 ... p2, c2, n2
-                    # after:  p1, c2, n1 ... p2, c1, n2
-                    before = d1[p1] + d1[n1] + d2[p2] + d2[n2]
-                    after = d2[p1] + d2[n1] + d1[p2] + d1[n2]
+                    before = dist[p1][c1] + dist[c1][n1] + \
+                        dist[p2][c2] + dist[c2][n2]
+                    after = dist[p1][c2] + dist[c2][n1] + \
+                        dist[p2][c1] + dist[c1][n2]
                 if after < before:
-                    (tour[index1-1], tour[index2-1]) = (c2, c1)  # swap
+                    (tour[i-1], tour[j-1]) = (c2, c1)  # swap
                     improved = True
-                    c1 = tour[index1-1]
-                    d1 = matrix[c1]
+                    c1 = tour[i-1]
     return tour
 
 
-def link_2_opt(tour, matrix):
+def link_2_opt(tour, dist):
     """
     Improve a tour by swapping pairs of links.
     Compare distances before and after each possible swap.
@@ -152,28 +145,23 @@ def link_2_opt(tour, matrix):
     improved = True
     while improved:
         improved = False
-        for index1 in range(len(tour)-2):
-            p1 = tour[index1-1]  # previous city
-            c1 = tour[index1]    # current city
-            d1 = matrix[c1]      # distances
-            for index2 in range(index1+2, len(tour)):
-                c2 = tour[index2-1]  # current city
-                n2 = tour[index2]    # next city
-                d2 = matrix[c2]      # distances
-                # before: p1, c1 ... c2, n2
-                # after:  p1, c2 ... c1, n2
-                before = d1[p1] + d2[n2]
-                after = d2[p1] + d1[n2]
+        for i in range(len(tour)-2):
+            p = tour[i-1]  # previous city
+            c1 = tour[i]
+            for j in range(i+2, len(tour)):
+                c2 = tour[j-1]
+                n = tour[j]  # next city
+                before = dist[p][c1] + dist[c2][n]
+                after = dist[p][c2] + dist[c1][n]
                 if after < before:
                     # reverse the section of the tour between the links
-                    tour[index1:index2] = reversed(tour[index1:index2])
+                    tour[i:j] = reversed(tour[i:j])
                     improved = True
-                    c1 = tour[index1]
-                    d1 = matrix[c1]
+                    c1 = tour[i]
     return tour
 
 
-def link_3_opt(tour, matrix):
+def link_3_opt(tour, dist):
     """
     Improve a tour by rearranging sets of 3 of links.
     Compare distances before and after each possible rearrangement.
@@ -183,68 +171,50 @@ def link_3_opt(tour, matrix):
     improved = True
     while improved:
         improved = False
-        for index1 in range(len(tour)-4):
-            p1 = tour[index1-1]  # previous city
-            c1 = tour[index1]    # current city
-            d1 = matrix[c1]      # distances
-            for index2 in range(index1+2, len(tour)-2):
-                c2 = tour[index2-1]
-                c3 = tour[index2]
-                d2 = matrix[c2]
-                d3 = matrix[c3]
-                for index3 in range(index2+2, len(tour)):
-                    c4 = tour[index3-1]  # current city
-                    n4 = tour[index3]    # next city
-                    d4 = matrix[c4]      # distances
-                    # before: p1, c1 ... c2, c3 ... c4, n4
-                    # after1: p1, c2 ... c1, c3 ... c4, n4
-                    # after2: p1, c1 ... c2, c4 ... c3, n4
-                    # after3: p1, c2 ... c1, c4 ... c3, n4
-                    # after4: p1, c3 ... c4, c1 ... c2, n4
-                    # after5: p1, c3 ... c4, c2 ... c1, n4
-                    # after6: p1, c4 ... c3, c1 ... c2, n4
-                    # after7: p1, c4 ... c3, c2 ... c1, n4
-                    before = d1[p1] + d2[c3] + d4[n4]
-                    after1 = d2[p1] + d1[c3] + d4[n4]
-                    after2 = d1[p1] + d2[c4] + d3[n4]
-                    after3 = d2[p1] + d1[c4] + d3[n4]
-                    after4 = d3[p1] + d4[c1] + d2[n4]
-                    after5 = d3[p1] + d4[c2] + d1[n4]
-                    after6 = d4[p1] + d3[c1] + d2[n4]
-                    after7 = d4[p1] + d3[c2] + d1[n4]
+        for i in range(len(tour)-4):
+            p = tour[i-1]  # previous city
+            c1 = tour[i]
+            for j in range(i+2, len(tour)-2):
+                c2 = tour[j-1]
+                c3 = tour[j]
+                for k in range(j+2, len(tour)):
+                    c4 = tour[k-1]  # current city
+                    n = tour[k]     # next city
+                    before = dist[p][c1] + dist[c2][c3] + dist[c4][n]
+                    after1 = dist[p][c2] + dist[c1][c3] + dist[c4][n]
+                    after2 = dist[p][c1] + dist[c2][c4] + dist[c3][n]
+                    after3 = dist[p][c2] + dist[c1][c4] + dist[c3][n]
+                    after4 = dist[p][c3] + dist[c4][c1] + dist[c2][n]
+                    after5 = dist[p][c3] + dist[c4][c2] + dist[c1][n]
+                    after6 = dist[p][c4] + dist[c3][c1] + dist[c2][n]
+                    after7 = dist[p][c4] + dist[c3][c2] + dist[c1][n]
                     best = min(before, after1, after2, after3,
                                after4, after5, after6, after7)
                     if before == best:
                         continue  # no change
                     elif after1 == best:
-                        tour[index1:index2] = reversed(tour[index1:index2])
+                        tour[i:j] = reversed(tour[i:j])
                     elif after2 == best:
-                        tour[index2:index3] = reversed(tour[index2:index3])
+                        tour[j:k] = reversed(tour[j:k])
                     elif after3 == best:
-                        tour[index1:index2] = reversed(tour[index1:index2])
-                        tour[index2:index3] = reversed(tour[index2:index3])
+                        tour[i:j] = reversed(tour[i:j])
+                        tour[j:k] = reversed(tour[j:k])
                     elif after4 == best:
-                        tour[index1:index3] = (
-                            tour[index2:index3] + tour[index1:index2])
+                        tour[i:k] = tour[j:k] + tour[i:j]
                     elif after5 == best:
-                        tour[index1:index3] = (
-                            tour[index2:index3] + list(reversed(tour[index1:index2])))
+                        tour[i:k] = tour[j:k] + list(reversed(tour[i:j]))
                     elif after6 == best:
-                        tour[index1:index3] = (
-                            list(reversed(tour[index2:index3])) + tour[index1:index2])
+                        tour[i:k] = list(reversed(tour[j:k])) + tour[i:j]
                     elif after7 == best:
-                        tour[index1:index3] = (
-                            list(reversed(tour[index2:index3])) + list(reversed(tour[index1:index2])))
+                        tour[i:k] = list(reversed(tour[j:k])) \
+                            + list(reversed(tour[i:j]))
                     else:
                         pass  # no change (should not get here!)
                     # If we get this far, the tour had been improved
                     improved = True
-                    c1 = tour[index1]
-                    c2 = tour[index2-1]
-                    c3 = tour[index2]
-                    d1 = matrix[c1]
-                    d2 = matrix[c2]
-                    d3 = matrix[c3]
+                    c1 = tour[i]
+                    c2 = tour[j-1]
+                    c3 = tour[j]
     return tour
 
 
@@ -253,29 +223,26 @@ def test():
     Test cases.
     """
     cities = read_city_coordinates('lab10.txt')
-    subset = cities[:15]
-    matrix = distance_matrix(subset)
-    for row in enumerate(matrix):
-        print(row)
-    assert 134 == matrix[0][1], f'{cities[0].name} to {cities[1].name}'
-    assert 134 == matrix[1][0], f'{cities[1].name} to {cities[0].name}'
-    assert 2755 == matrix[0][13], f'{cities[0].name} to {cities[13].name}'
-    assert 2755 == matrix[13][0], f'{cities[13].name} to {cities[0].name}'
-    minima = [min(d for d in row if d > 0) for row in matrix]
-    maxima = [max(row) for row in matrix]
+    dist = distance_matrix(cities)
+    assert 134 == dist[0][1], f'{cities[0].name} to {cities[1].name}'
+    assert 134 == dist[1][0], f'{cities[1].name} to {cities[0].name}'
+    assert 2755 == dist[0][13], f'{cities[0].name} to {cities[13].name}'
+    assert 2755 == dist[13][0], f'{cities[13].name} to {cities[0].name}'
+    minima = [min(d for d in row if d > 0) for row in dist]
+    maxima = [max(row) for row in dist]
     print(f'Lower bound: {sum(minima)}')
     print(f'Upper bound: {sum(maxima)}')
-    tour = list(range(len(subset)))
+    tour = list(range(50))
     random.shuffle(tour)
-    print(f'random: {tour_length(tour, matrix)} miles {tour}')
-    tour = greedy(tour, matrix)
-    print(f'greedy: {tour_length(tour, matrix)} miles {tour}')
-    tour = city_2_opt(tour, matrix)
-    print(f'city_2_opt: {tour_length(tour, matrix)} miles {tour}')
-    tour = link_2_opt(tour, matrix)
-    print(f'link_2_opt: {tour_length(tour, matrix)} miles {tour}')
-    tour = link_3_opt(tour, matrix)
-    print(f'link_3_opt: {tour_length(tour, matrix)} miles {tour}')
+    print(f'random: {tour_length(tour, dist)} miles {tour}')
+    tour = nearest_neighbor(tour, dist)
+    print(f'nearest_neighbor: {tour_length(tour, dist)} miles {tour}')
+    tour = city_2_opt(tour, dist)
+    print(f'city_2_opt: {tour_length(tour, dist)} miles {tour}')
+    tour = link_2_opt(tour, dist)
+    print(f'link_2_opt: {tour_length(tour, dist)} miles {tour}')
+    tour = link_3_opt(tour, dist)
+    print(f'link_3_opt: {tour_length(tour, dist)} miles {tour}')
 
 
 # random.seed(1)
