@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 1: Part Two
+"""
+
 
 def read_words(file_name):
     """
@@ -6,7 +10,7 @@ def read_words(file_name):
 
     A word is any sequence of non-blank characters.
     """
-    with open(file_name) as file:
+    with open(file_name, encoding='utf-8') as file:
         for line in file:
             yield from line.split()
 
@@ -15,8 +19,8 @@ def read_sequence(file_name):
     """
     Read a sequence of integers from a file.
 
-    The sequence in the file is preceded by an integer telling how many elements
-    there are in the sequence.
+    The sequence in the file is preceded by an integer telling how many
+    elements there are in the sequence.
     """
     words = read_words(file_name)  # generator
     length = int(next(words))
@@ -26,7 +30,9 @@ def read_sequence(file_name):
 
 
 def two_largest(numbers):
-    """Print the two largest different values among a sequence of integers."""
+    """
+    Print the two largest different values among a sequence of integers.
+    """
     largest = float('-Infinity')
     next_largest = float('-Infinity')
     for n in numbers:

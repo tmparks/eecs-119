@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 1: Part Three
+"""
+
 
 def read_words(file_name):
     """
@@ -8,7 +12,7 @@ def read_words(file_name):
     Line breaks in the input are discarded.
     Stops when the character % is encountered.
     """
-    with open(file_name) as file:
+    with open(file_name, encoding='utf-8') as file:
         for line in file:
             (line, eof, _) = line.partition('%')
             yield from line.split()
@@ -26,7 +30,7 @@ def print_words(file_name):
     line = []
     for word in read_words(file_name):
         line.append(word)
-        if (word.startswith(('r', 's', 't'))):
+        if word.startswith(('r', 's', 't')):
             print(' '.join(line))
             line.clear()
     if line:
