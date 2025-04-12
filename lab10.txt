@@ -1,0 +1,52 @@
+Longitude (W)	Latitude (N)	City
+Deg	Min	Deg	Min
+74	01	40	47	West New York, NJ
+75	55	42	06	Binghamton, NY
+80	00	40	27	Pittsburgh, PA
+75	15	41	34	Honesdale, PA
+82	33	35	36	Asheville, NC
+74	39	40	21	Princeton, NJ
+122	54	47	02	Olympia, WA
+81	31	41	05	Akron, OH
+122	10	37	26	Palo Alto, CA
+78	38	35	47	Raleigh, NC
+75	32	39	09	Dover, DE
+73	56	42	49	Schenectady, NY
+111	56	33	26	Tempe, AZ
+131	42	55	22	Charcoal Point Village, AK
+86	18	32	21	Montgomery, AL
+83	19	36	51	Harlan, KY
+77	06	38	53	Arlington, VA
+98	29	29	25	San Antonio, TX
+104	59	39	45	Denver, CO
+121	30	38	35	Sacramento, CA
+71	23	41	53	Pawtucket, RI
+80	09	26	00	Hollywood, FL
+84	23	33	46	Atlanta, GA
+76	18	36	51	Norfolk, VA
+94	23	40	24	Keokuk, IA
+91	22	39	42	Hannibal, MO
+83	03	42	20	Detroit, MI
+88	26	42	35	Lake Geneva, WI
+92	17	30	00	Kaplan, LA
+73	52	41	09	Ossining, NY
+78	14	39	37	Berkeley Springs, WV
+93	58	44	19	Saint Peter, MN
+95	23	29	45	Houston, TX
+111	37	42	39	Soda Springs, ID
+74	45	41	48	Liberty, NY
+89	39	39	49	Springfield, IL
+155	05	19	44	Hilo, HI
+86	23	35	51	Murfreesboro, TN
+111	40	40	14	Provo, UT
+68	00	46	52	Caribou, ME
+106	13	41	54	Medicine Bow, WY
+96	55	35	20	Shawnee, OK
+67	06	18	23	Moca, PR
+110	28	40	11	Lovelock, NV
+100	04	45	44	Mound City, SD
+98	52	48	07	Devils Lake, ND
+91	51	33	56	Star City, AR
+80	50	32	41	Yamasee, SC
+77	09	39	05	Rockville, MD
+120	12	45	00	Fossil, OR
