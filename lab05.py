@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 5: A simple graphics language
+"""
+
 
 class Plotter:
-    page = list()  # page (list of rows)
+    """
+    A lousy plotter.
+    """
+    page = []      # page (list of rows)
     off = 0        # number of off-page points
     rows = 0       # number of rows on the page
     columns = 0    # number of columns on the page
@@ -11,43 +18,65 @@ class Plotter:
     column_change = 0
 
     def __init__(self, rows, columns):
+        """
+        Initialize a newly created instance.
+        """
         self.rows = rows
         self.columns = columns
         self.erase()
 
     def move(self, row, column):
+        """
+        Move the imaginary pen without drawing any output.
+        """
         self.row = row
         self.column = column
 
     def step(self, n):
+        """
+        Move the imaginary pen, drawing output after each step.
+        The new position of the pen is determined by the previously specified
+        vertical and horizontal change.
+        """
         for _ in range(n):
             self.row += self.row_change
             self.column += self.column_change
             row = round(self.row)
             column = round(self.column)
-            if (0 <= row and row < self.rows
-                    and 0 <= column and column < self.columns):
+            if 0 <= row < self.rows and 0 <= column < self.columns:
                 line = self.page[row]
                 self.page[row] = line[:column] + '*' + line[column+1:]
             else:
                 self.off += 1
 
     def vchange(self, row_change):
+        """
+        Set the vertical change to the specified number of rows.
+        """
         self.row_change = row_change
 
     def hchange(self, column_change):
+        """
+        Set the horizontal change to the specified number of columns.
+        """
         self.column_change = column_change
 
     def print(self):
-        print('╭' + '─' * self.columns +'╮')
-        for row in reversed(self.page): # print rows from top to bottom
+        """
+        Print the image.
+        """
+        print('╭' + '─' * self.columns + '╮')
+        for row in reversed(self.page):  # print rows from top to bottom
             print('│' + ''.join(row) + '│')
         print('╰' + '─' * self.columns + '╯')
-        if (self.off > 0):
+        if self.off > 0:
             print('There were', self.off, 'off-page points')
             self.off = 0
 
     def erase(self):
+        """
+        Erase the image.
+        """
         self.page.clear()
         for _ in range(self.rows):
             self.page.append(' ' * self.columns)
@@ -59,14 +88,18 @@ def read_words(file_name):
 
     A word is any sequence of non-blank characters.
     """
-    with open(file_name) as file:
+    with open(file_name, encoding='utf-8') as file:
         for line in file:
             yield from line.split()
 
+
 def read_commands(file_name, plotter):
-    words = read_words(file_name) # generator
+    """
+    Read plotting commands from a file.
+    """
+    words = read_words(file_name)  # generator
     for word in words:
-        command = word.lower() # ignore case
+        command = word.lower()  # ignore case
         if command.startswith('m'):
             row = float(next(words))
             column = float(next(words))
