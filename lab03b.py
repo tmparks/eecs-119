@@ -1,7 +1,13 @@
-
 #!/usr/bin/env python3
+"""
+Programming Assignment 3: A simple interactive game
+"""
+
 
 def them(stones, start):
+    """
+    Human takes a turn.
+    """
     print('There are', stones, 'stones')
     while True:
         take = int(input('How many do you take? '))
@@ -20,19 +26,29 @@ def them(stones, start):
 
 
 def us(stones):
+    """
+    Computer takes a turn.
+    """
     take = max(1, (stones - 1) % 4)  # must take at least one
     print('I take', take)
     return take
 
 
-start = 21
-stones = start
+def play():
+    """
+    Play the game.
+    """
+    start = 21
+    stones = start
 
-while stones > 0:
-    stones -= them(stones, start)
-    if stones == 0:
-        print('You took the last stone. You lose.')
-    else:
-        stones -= us(stones)
+    while stones > 0:
+        stones -= them(stones, start)
         if stones == 0:
-            print('I took the last stone. I lose.')
+            print('You took the last stone. You lose.')
+        else:
+            stones -= us(stones)
+            if stones == 0:
+                print('I took the last stone. I lose.')
+
+
+play()
