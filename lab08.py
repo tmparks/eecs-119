@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 8: Interactive database for course grades
+"""
+
 
 import collections
 import pickle
 import sys
 
+
 class Database:
-    assignments = list() # A list of assignment names
-    grades = collections.defaultdict(list) # A list of grades for each student
-    modified = False # Indicates unsaved modifications
+    """
+    A simple database for course grades.
+    """
+    assignments = []  # A list of assignment names
+    grades = collections.defaultdict(list)  # A list of grades for each student
+    modified = False  # Indicates unsaved modifications
 
     def new(self):
+        """
+        Create a new database, forgetting any current content.
+        The user is prompted to enter student names.
+        """
         self.assignments.clear()
         self.grades.clear()
         print('Enter "END" after the last student name')
@@ -17,18 +29,24 @@ class Database:
             student = input('Student name? ').strip()
             if student.lower() == 'end':
                 break
-            elif student in self.grades:
+            if student in self.grades:
                 print('There is already a student with the name', student)
             else:
                 self.grades[student].clear()
         self.modified = True
 
     def edit(self, file_name):
+        """
+        Load content from a file so that the database can be edited.
+        """
         with open(file_name, 'rb') as file:
             self.assignments = pickle.load(file)
             self.grades = pickle.load(file)
 
     def update(self):
+        """
+        Prompt the user to enter grades for a new assignment.
+        """
         assert self.grades, 'There are no students in the database'
         assignment = input('Assignment name? ').strip()
         if assignment in self.assignments:
@@ -36,11 +54,15 @@ class Database:
         else:
             self.assignments.append(assignment)
             for key in self.grades:
-                self.grades[key].append(int(input('Grade for {}? '.format(key))))
+                self.grades[key].append(int(input(f'Grade for {key}? ')))
             self.modified = True
 
     def change(self):
-        choice = input('Change assignment name, student name, or grade? ').strip().lower()
+        """
+        Change the data for an item in the database.
+        """
+        choice = input(
+            'Change assignment name, student name, or grade? ').strip().lower()
         if choice.startswith('a'):
             self.change_assignment_name()
         elif choice.startswith('s'):
@@ -49,8 +71,11 @@ class Database:
             self.change_grade()
         else:
             print(choice, 'is an invalid choice')
-        
+
     def change_assignment_name(self):
+        """
+        Change the name of an assignment.
+        """
         assert self.assignments, 'There are no assignments in the database'
         old_name = input('Current assignment name? ').strip()
         if old_name in self.assignments:
@@ -65,6 +90,9 @@ class Database:
             print('There is no assignment with the name', old_name)
 
     def change_student_name(self):
+        """
+        Change the name of a student.
+        """
         assert self.grades, 'There are no students in the database'
         old_name = input('Current student name? ').strip()
         if old_name in self.grades:
@@ -79,6 +107,9 @@ class Database:
             print('There is no student with the name', old_name)
 
     def change_grade(self):
+        """
+        Change a student's grade.
+        """
         assert self.assignments, 'There are no assignments in the database'
         assert self.grades, 'There are no students in the database'
         assignment = input('Assignment name? ').strip()
@@ -95,6 +126,9 @@ class Database:
             print('There is no assignment with the name', assignment)
 
     def save(self, file_name):
+        """
+        Save content to a file.
+        """
         assert self.assignments, 'There are no assignments in the database'
         assert self.grades, 'There are no students in the database'
         with open(file_name, 'wb') as file:
@@ -103,6 +137,9 @@ class Database:
         self.modified = False
 
     def type(self, file=sys.stdout):
+        """
+        Display content.
+        """
         assert self.assignments, 'There are no assignments in the database'
         assert self.grades, 'There are no students in the database'
         print('Number of students', len(self.grades), file=file)
@@ -111,16 +148,18 @@ class Database:
         for key in self.grades:
             print(key, self.grades[key], file=file)
 
-    def list(self, file_name):
-        with open(file_name, 'wt') as file:
-            self.type(file)
 
-def help(command):
+def print_help(command):
+    """
+    Provide help for all available commands.
+    """
     if command == 'new':
-        print('Discard current database content, if any, and create a new database.')
+        print('Discard current database content, if any, '
+              + 'and create a new database.')
         print('You will be prompted for student names.')
     elif command == 'edit':
-        print('Discard curent database content, if any, and read data from a file.')
+        print('Discard curent database content, if any, '
+              + 'and read data from a file.')
         print('See SAVE')
     elif command == 'update':
         print('Enter grades for a new assignment. You will be prompted for')
@@ -133,21 +172,29 @@ def help(command):
     elif command == 'type':
         print('Display the current database content in human-readable form.')
     elif command == 'list':
-        print('Save the current database content to a file in human-readable form.')
+        print('Save the current database content to a file '
+              + 'in human-readable form.')
     elif command == 'quit':
         print('Quit from the current session. You will be prompted to')
         print('save the database if there are any unsaved modifictions')
     else:
-        print('Available commands: NEW, EDIT, UPDATE, CHANGE, SAVE, TYPE, LIST, HELP, QUIT')
-        print('To get information about any of the commands, type a line containing')
-        print('"HELP <comm>" with <comm> replaced by the desired command name.')
+        print('Available commands: '
+              + 'NEW, EDIT, UPDATE, CHANGE, SAVE, TYPE, LIST, HELP, QUIT')
+        print('To get information about any of the commands, '
+              + 'type a line containing')
+        print('"HELP <comm>" with <comm> replaced by '
+              + 'the desired command name.')
+
 
 def read_commands(database):
+    """
+    Process commands.
+    """
     binary_file_name = 'lab08_save.pickle'
     text_file_name = 'lab08_list.txt'
     while True:
         try:
-            command = input('Command? ').strip().lower() # ignore case
+            command = input('Command? ').strip().lower()  # ignore case
             if command.startswith('n'):
                 database.new()
             elif command.startswith('e'):
@@ -161,9 +208,10 @@ def read_commands(database):
             elif command.startswith('t'):
                 database.type()
             elif command.startswith('l'):
-                database.list(text_file_name)
+                with open(text_file_name, encoding='utf-8', mode='wt') as file:
+                    database.type(file)
             elif command.startswith('h'):
-                help(command.split().pop())
+                print_help(command.split().pop())
             elif command.startswith('q'):
                 if database.modified and bool(input('Save before quitting? ')):
                     database.save(binary_file_name)
@@ -174,8 +222,13 @@ def read_commands(database):
         except AssertionError as e:
             print(e)
 
+
 def test():
+    """
+    Test cases.
+    """
     d = Database()
     read_commands(d)
+
 
 test()
