@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 6: N queens
+"""
+
 
 def is_safe(position, queens):
     """
@@ -8,8 +12,8 @@ def is_safe(position, queens):
     (row, col) = position
     for (occupied_row, occupied_col) in queens:
         if (row == occupied_row
-            or col == occupied_col
-            or abs(row - occupied_row) == abs(col - occupied_col)):
+                or col == occupied_col
+                or abs(row - occupied_row) == abs(col - occupied_col)):
             return False
     return True
 
@@ -25,12 +29,12 @@ def solve_recursively(n, row, queens):
     for col in range(n):
         position = (row, col)
         if is_safe(position, queens):
-            queens.append(position) # tentatively place queen
+            queens.append(position)  # tentatively place queen
             if row+1 < n:
                 if solve_recursively(n, row+1, queens):
                     return True
                 else:
-                    del queens[-1] # backtrack
+                    del queens[-1]  # backtrack
             else:
                 return True
     return False
@@ -43,15 +47,19 @@ def solve(n):
     Returns an empty list upon failure.
     """
     row = 0
-    queens = list()
+    queens = []
     solve_recursively(n, row, queens)
     return queens
 
 
 def test():
+    """
+    Test cases.
+    """
     for n in range(1, 9):
         queens = solve(n)
         print('placed', len(queens), 'queens on', n, 'x', n, 'board')
         print(queens)
+
 
 test()
