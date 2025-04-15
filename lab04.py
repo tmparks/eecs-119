@@ -20,7 +20,7 @@ class TextFormatter:
     do_justify = False       # current justification state
     next_do_justify = False  # justification for the next paragraph
     output = ''              # output line
-    words = list()           # words in current line
+    words = []               # words in current line
     is_first_line = True     # first line
 
     def print_line(self, justify):

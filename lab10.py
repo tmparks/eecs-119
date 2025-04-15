@@ -30,8 +30,8 @@ def read_city_coordinates(file_name):
     Read city coordinates from a file.
     Returns a list of City tuples.
     """
-    result = list()  # initially empty
-    with open(file_name, encoding="utf-8") as file:
+    result = []  # initially empty
+    with open(file_name, encoding='utf-8') as file:
         # Skip heading (2 lines)
         next(file)
         next(file)
