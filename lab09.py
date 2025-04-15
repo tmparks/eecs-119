@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# pylint: enable=useless-suppression
 """
 Programming Assignment 9: A polygon editor
 """
