@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 7: Scene analysis
+"""
+
 
 class Picture:
-    light = +1  # initial value for light pixels
-    dark = -1   # initial value for dark pixels
-    neutral = 0 # temporary value for pixels
-    lines = 0   # number of lines in picture
-    columns = 0 # number of columns in picture
-    light_regions = set() # colors of light regions
-    dark_regions = set()  # colors of dark regions
-    light_edge_regions = set() # colors of light regions that touch the edge
-    dark_edge_regions = set()  # colors of dark regions that touch the an edge
-    region_sizes = dict() # sizes of regions
-    picture = list()      # picture (list of lines)
+    """
+    A simple picture.
+    """
+    light = +1   # initial value for light pixels
+    dark = -1    # initial value for dark pixels
+    neutral = 0  # temporary value for pixels
+    lines = 0    # number of lines in picture
+    columns = 0  # number of columns in picture
+    light_regions = set()  # colors of light regions
+    dark_regions = set()   # colors of dark regions
+    light_edge_regions = set()  # colors of light regions that touch the edge
+    dark_edge_regions = set()   # colors of dark regions that touch the an edge
+    region_sizes = dict()  # sizes of regions
+    picture = list()       # picture (list of lines)
 
     def erase(self, lines, columns):
         """
@@ -21,9 +28,9 @@ class Picture:
         self.lines = lines
         self.columns = columns
         self.picture = list()
-        for l in range(lines):
+        for _ in range(lines):
             line = list()
-            for c in range(columns):
+            for _ in range(columns):
                 line.append(self.light)
             self.picture.append(line)
 
@@ -35,15 +42,15 @@ class Picture:
         The '*' character indicates a dark pixel.
         The '-' character indicates a light pixel.
         """
-        with open(file_name) as file:
+        with open(file_name, encoding='utf-8') as file:
             lines = int(next(file))
             columns = int(next(file))
             self.erase(lines, columns)
-            for l in range(lines):
+            for row in range(lines):
                 line = next(file)
-                for c in range(columns):
-                    if line[c] == '*':
-                        self.picture[l][c] = self.dark
+                for col in range(columns):
+                    if line[col] == '*':
+                        self.picture[row][col] = self.dark
 
     def print(self, dark_regions):
         """
@@ -70,55 +77,58 @@ class Picture:
         The sets of pixel values for light and dark regions,
         as well as for edge-touching regions, are also saved.
         """
-        for l in range(self.lines):
-            for c in range(self.columns):
-                if self.picture[l][c] == self.light:
+        for row in range(self.lines):
+            for col in range(self.columns):
+                if self.picture[row][col] == self.light:
                     color = self.light + len(self.light_regions) + 1
                     self.light_regions.add(color)
-                    self.region_sizes[color] = self.flood(l, c, self.light, color)
-                elif self.picture[l][c] == self.dark:
+                    self.region_sizes[color] = self.flood(
+                        row, col, self.light, color)
+                elif self.picture[row][col] == self.dark:
                     color = self.dark - len(self.dark_regions) - 1
                     self.dark_regions.add(color)
-                    self.region_sizes[color] = self.flood(l, c, self.dark, color)
-                self.check_edge(l, c)
+                    self.region_sizes[color] = self.flood(
+                        row, col, self.dark, color)
+                self.check_edge(row, col)
 
-    def flood(self, l, c, old_color, new_color):
+    def flood(self, row, col, old_color, new_color):
         """
         Recursively color a region by filling the pixel in the given
         line and column as well its four nearest neighbors with a new color.
         Returns the number of pixels in the region.
         """
         size = 0
-        if (    0 <= l and l < self.lines
-                and 0 <= c and c < self.columns
-                and self.picture[l][c] == old_color):
-            self.picture[l][c] = new_color
+        if (
+                0 <= row < self.lines
+                and 0 <= col < self.columns
+                and self.picture[row][col] == old_color):
+            self.picture[row][col] = new_color
             size += 1
-            size += self.flood(l+1, c, old_color, new_color)
-            size += self.flood(l-1, c, old_color, new_color)
-            size += self.flood(l, c+1, old_color, new_color)
-            size += self.flood(l, c-1, old_color, new_color)
-            # self.flood(l+1, c+1, old_color, new_color)
-            # self.flood(l+1, c-1, old_color, new_color)
-            # self.flood(l-1, c+1, old_color, new_color)
-            # self.flood(l-1, c-1, old_color, new_color)
+            size += self.flood(row+1, col, old_color, new_color)
+            size += self.flood(row-1, col, old_color, new_color)
+            size += self.flood(row, col+1, old_color, new_color)
+            size += self.flood(row, col-1, old_color, new_color)
         return size
 
-    def check_edge(self, l, c):
+    def check_edge(self, row, col):
         """
         Check whether or not the pixel in the given line and column
         is on the edge of the image.
         The sets of pixel values for light and dark edge-touching regions
         are updated accordingly.
         """
-        if l == 0 or c == 0 or l == self.lines - 1 or c == self.columns - 1:
-            color = self.picture[l][c]
+        if (
+                row == 0
+                or col == 0
+                or row == self.lines - 1
+                or col == self.columns - 1):
+            color = self.picture[row][col]
             if color >= self.light:
                 self.light_edge_regions.add(color)
             if color <= self.dark:
                 self.dark_edge_regions.add(color)
 
-    def neighbors(self, l, c, color):
+    def neighbors(self, row, col, color):
         """
         Returns the set of pixel values for regions that neighbor
         the region of the given line, column, and color.
@@ -127,15 +137,15 @@ class Picture:
         of the region by calling flood().
         """
         result = set()
-        if 0 <= l and l < self.lines and 0 <= c and c < self.columns:
-            if self.picture[l][c] == color:
-                self.picture[l][c] = self.neutral
-                result.update(self.neighbors(l+1, c, color))
-                result.update(self.neighbors(l-1, c, color))
-                result.update(self.neighbors(l, c+1, color))
-                result.update(self.neighbors(l, c-1, color))
-            elif self.picture[l][c] != self.neutral:
-                result.add(self.picture[l][c])
+        if 0 <= row < self.lines and 0 <= col < self.columns:
+            if self.picture[row][col] == color:
+                self.picture[row][col] = self.neutral
+                result.update(self.neighbors(row+1, col, color))
+                result.update(self.neighbors(row-1, col, color))
+                result.update(self.neighbors(row, col+1, color))
+                result.update(self.neighbors(row, col-1, color))
+            elif self.picture[row][col] != self.neutral:
+                result.add(self.picture[row][col])
         return result
 
     def surrounded(self):
@@ -148,16 +158,16 @@ class Picture:
         result = set()
         light_regions = self.light_regions - self.light_edge_regions
         dark_regions = self.dark_regions - self.dark_edge_regions
-        for l in range(self.lines):
-            for c in range(self.columns):
-                color = self.picture[l][c]
+        for row in range(self.lines):
+            for col in range(self.columns):
+                color = self.picture[row][col]
                 if color in dark_regions:
-                    if self.neighbors(l, c, color).issubset(light_regions):
+                    if self.neighbors(row, col, color).issubset(light_regions):
                         result.add(color)
-                    self.flood(l, c, self.neutral, color)
+                    self.flood(row, col, self.neutral, color)
         return result
 
-    def regions_by_size(self, regions, min, max):
+    def regions_by_size(self, regions, min_size, max_size):
         """
         Returns the set of pixel values for regions that have a size
         between the given bounds.
@@ -165,13 +175,17 @@ class Picture:
         result = set()
         for color in regions:
             size = self.region_sizes[color]
-            if min <= size and size <= max:
+            if min_size <= size <= max_size:
                 result.add(color)
         return result
 
+
 def test():
+    """
+    Test cases.
+    """
     p = Picture()
-    p.read('lab07a.txt')
+    p.read('lab07.txt')
     p.color()
     p.print(p.dark_regions)
     print('There are', len(p.light_regions), 'light regions.')
@@ -188,5 +202,6 @@ def test():
     p.print(p.regions_by_size(p.dark_regions, 80, 100*100))
     print('Surrounded regions')
     p.print(p.surrounded())
+
 
 test()

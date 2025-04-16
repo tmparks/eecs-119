@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 1: Part One
+"""
+
 
 def reciprocal_sum(limit, bias=0):
     """

@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 9: A polygon editor
+"""
+
 
 import math
 
 
-################################################################################
+###############################################################################
 
 class Point:
+    """
+    A point in the X,Y plane.
+    """
     coordinates = tuple()  # tuple with X and Y coordinates.
 
     def __init__(self, coordinates):
@@ -26,9 +33,12 @@ class Point:
             (b-a)**2 for a, b in zip(self.coordinates, other.coordinates)))
 
 
-################################################################################
+###############################################################################
 
 class Line:
+    """
+    A line in the X.Y plane.
+    """
     points = tuple()  # tuple with 2 points
     length = 0.0  # distance between the 2 points
 
@@ -39,7 +49,8 @@ class Line:
 
     def distance(self, point):
         """
-        [Distance from a point to a line: Line defined by two points](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
+        [Distance from a point to a line: Line defined by two points](
+            https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points)
         """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
@@ -51,12 +62,17 @@ class Line:
         return numerator / self.length
 
 
-################################################################################
+###############################################################################
 
 class LineSegment(Line):
+    """
+    A line segment in the X,Y plane.
+    """
+
     def distance(self, point):
         """
-        [Distance from a point to a line: A vector projection proof](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof)
+        [Distance from a point to a line: A vector projection proof](
+            https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof)
         """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
@@ -76,7 +92,8 @@ class LineSegment(Line):
         """
         Determine wether or not a semi-infinte horizonal ray
         intersects the line segment.
-        [Algorithm 112: Position of point relative to polygon](https://doi.org/10.1145/368637.368653)
+        [Algorithm 112: Position of point relative to polygon](
+            https://doi.org/10.1145/368637.368653)
         """
         x0 = point.coordinates[0]
         y0 = point.coordinates[1]
@@ -88,16 +105,19 @@ class LineSegment(Line):
                 and (((x0-x1) - (y0-y1)*(x2-x1)/(y2-y1)) < 0))
 
 
-################################################################################
+###############################################################################
 
 class Polygon:
-    _vertices = list()  # ordered list of vertices
-    _edges = list()     # ordered list of edges, lazily evaluated
+    """
+    A polygon in the X,Y plane.
+    """
+    _vertices = []  # ordered list of vertices
+    _edges = []     # ordered list of edges, lazily evaluated
 
     def __init__(self, vertices):
         assert len(vertices) >= 3, 'a polygon must have 3 or more vertices'
         self._vertices = list(vertices)
-        self._edges = list()
+        self._edges = []
 
     def _init_edges(self):
         if len(self._edges) == 0:
@@ -111,7 +131,8 @@ class Polygon:
         Compare to another polygon.
         """
         return (len(self._vertices) == len(other._vertices)
-                and all(a == b for a, b in zip(self._vertices, other._vertices)))
+                and all(a == b
+                        for a, b in zip(self._vertices, other._vertices)))
 
     def __getitem__(self, index):
         """
@@ -126,7 +147,8 @@ class Polygon:
         return len(self._vertices)
 
     def __str__(self):
-        return str(len(self._vertices)) + ': ' + ', '.join(str(v) for v in self._vertices)
+        return (str(len(self._vertices)) + ': '
+                + ', '.join(str(v) for v in self._vertices))
 
     def add(self, point):
         """
@@ -148,7 +170,8 @@ class Polygon:
     def contains(self, point):
         """
         [Point in polygon](https://en.wikipedia.org/wiki/Point_in_polygon)
-        [Algorithm 112: Position of point relative to polygon](https://doi.org/10.1145/368637.368653)
+        [Algorithm 112: Position of point relative to polygon](
+            https://doi.org/10.1145/368637.368653)
         """
         self._init_edges()
         count = sum(int(e.intersects(point)) for e in self._edges)
@@ -189,10 +212,13 @@ class Polygon:
         return distance
 
 
-################################################################################
+###############################################################################
 
 class Scene:
-    polygons = list()  # ordered list of polygons
+    """
+    A collection of polygons.
+    """
+    polygons = []  # ordered list of polygons
 
     def add_polygon(self, polygon):
         """
@@ -256,7 +282,7 @@ class Scene:
         return nearest
 
 
-################################################################################
+###############################################################################
 
 def add_polygon(scene, line):
     """
@@ -265,7 +291,7 @@ def add_polygon(scene, line):
     words = iter(line.split())
     assert next(words) == 'A', 'invalid command'
     n = int(next(words))
-    vertices = list()  # initially empty
+    vertices = []  # initially empty
     for _ in range(n):
         coordinates = (float(next(words)), float(next(words)))
         vertices.append(Point(coordinates))
@@ -311,9 +337,9 @@ def find_polygon(scene, line):
     coordinates = (float(next(words)), float(next(words)))
     point = Point(coordinates)
     nearest_polygon = scene.polygons[scene.find_polygon_by_edge(point)]
-    print(f'Point: {point}')
-    print(f'Nearest polygon: {nearest_polygon}')
-    print(f'Distance: {nearest_polygon.edge_distance(point)}')
+    print('Point:', point)
+    print('Nearest polygon:', nearest_polygon)
+    print('Distance:', nearest_polygon.edge_distance(point))
 
 
 def find_vertex(scene, line):
@@ -326,10 +352,10 @@ def find_vertex(scene, line):
     point = Point(coordinates)
     nearest_polygon = scene.polygons[scene.find_polygon_by_vertex(point)]
     nearest_vertex = nearest_polygon[nearest_polygon.nearest_vertex(point)]
-    print(f'Point: {point}')
-    print(f'Polygon with nearest vertex: {nearest_polygon}')
-    print(f'Nearest vertex: {nearest_vertex}')
-    print(f'Distance: {nearest_vertex.distance(point)}')
+    print('Point:', point)
+    print('Polygon with nearest vertex:', nearest_polygon)
+    print('Nearest vertex:', nearest_vertex)
+    print('Distance:', nearest_vertex.distance(point))
 
 
 def list_polygons(scene, line):
@@ -340,11 +366,11 @@ def list_polygons(scene, line):
     assert next(words) == 'L', 'invalid command'
     word = next(words)
     if word == '*':
-        print(f'There are {len(scene.polygons)} polygons')
+        print('There are', len(scene.polygons), 'polygons')
     else:
         size = int(word)
-        print(
-            f'There are {sum(int(len(p) == size) for p in scene.polygons)} polygons of size {size}')
+        print('There are', sum(int(len(p) == size) for p in scene.polygons),
+              'polygons of size', size)
 
 
 def list_all_vertices(scene, line):
@@ -353,7 +379,7 @@ def list_all_vertices(scene, line):
     """
     words = iter(line.split())
     assert next(words) == 'l', 'invalid command'
-    print(f'There are {sum(len(p) for p in scene.polygons)} vertices')
+    print('There are', sum(len(p) for p in scene.polygons), 'vertices')
 
 
 def list_vertices(scene, line):
@@ -374,11 +400,16 @@ def list_vertices(scene, line):
 
 
 def print_help():
+    """
+    Provide help for all available commands.
+    """
     print('Available commands:')
     print('A n x1 y1 x2 y2 ... xn yn')
-    print('\tadd a polygon of n points, the points being (x1,y1), (x2,y2), ..., (xn,yn)')
+    print('\tadd a polygon of n points,',
+          'the points being (x1,y1), (x2,y2), ..., (xn,yn)')
     print('a x1 y1')
-    print('\tadd the point (x1,y1) to the polygon with the nearest vertex (see f)')
+    print('\tadd the point (x1,y1) to the polygon',
+          'with the nearest vertex (see f)')
     print('D x1 y1')
     print('\tdelete the polygon closest to the point (x1,y1) (see F)')
     print('d x1 y1')
@@ -404,7 +435,10 @@ def print_help():
 
 
 def read_commands(scene, file_name):
-    with open(file_name) as file:
+    """
+    Process commands.
+    """
+    with open(file_name, encoding='utf-8') as file:
         for line in file:
             if line.startswith('A'):
                 add_polygon(scene, line)
@@ -432,11 +466,14 @@ def read_commands(scene, file_name):
             elif line.startswith('#'):
                 print(line, end='')  # print comment
             else:
-                print('Unrecognized command: ' + line)
+                print('Unrecognized command:', line)
                 print_help()
 
 
 def test():
+    """
+    Test cases.
+    """
     pt1 = Point((1.0, 2.0))
     pt2 = Point((3.0, 4.0))
     pt3 = Point((1.0, 4.0))

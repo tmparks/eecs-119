@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Programming Assignment 2: Part Two
+"""
+
 
 def integral(x):
     """
@@ -7,7 +11,7 @@ def integral(x):
     """
     if not (0 < x and x <= 1):
         raise ValueError('argument must be in the interval (0,1]')
-    sum = x
+    value = x
     numerator = x
     factorial = 1
     small_enough = 1e-6
@@ -16,17 +20,24 @@ def integral(x):
     for n in range(1, limit):
         denominator = factorial * (2 * n + 1)
         term = numerator / denominator
-        sum += term
+        value += term
         numerator *= -x * x
         factorial *= n
         if abs(term) < small_enough:
             reason = 'Accurate'
             break
-    return (sum, abs(term), '{} after {} iterations'.format(reason, n + 1))
+    return (value, abs(term), f'{reason} after {n+1} iterations')
 
 
-# x = 0.352234607
-x = 0.587040260
-(sum, error, reason) = integral(x)
-print('integral({}) = {} +/- {}'.format(x, sum, error))
-print(reason)
+def test():
+    """
+    Test cases.
+    """
+    # x = 0.352234607
+    x = 0.587040260
+    (value, error, reason) = integral(x)
+    print(f'integral({x}) = {value} +/- {error}')
+    print(reason)
+
+
+test()
