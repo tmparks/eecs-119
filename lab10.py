@@ -233,19 +233,19 @@ def test():
     assert 2755 == dist[13][0], f'{cities[13].name} to {cities[0].name}'
     minima = [min(d for d in row if d > 0) for row in dist]
     maxima = [max(row) for row in dist]
-    print(f'Lower bound: {sum(minima)}')
-    print(f'Upper bound: {sum(maxima)}')
+    print('Lower bound:', sum(minima))
+    print('Upper bound:', sum(maxima))
     tour = list(range(50))
     random.shuffle(tour)
-    print(f'random: {tour_length(tour, dist)} miles {tour}')
+    print('random:', tour_length(tour, dist), 'miles', tour)
     tour = nearest_neighbor(tour, dist)
-    print(f'nearest_neighbor: {tour_length(tour, dist)} miles {tour}')
+    print('nearest_neighbor:', tour_length(tour, dist), 'miles', tour)
     tour = city_2_opt(tour, dist)
-    print(f'city_2_opt: {tour_length(tour, dist)} miles {tour}')
+    print('city_2_opt:', tour_length(tour, dist), 'miles', tour)
     tour = link_2_opt(tour, dist)
-    print(f'link_2_opt: {tour_length(tour, dist)} miles {tour}')
+    print('link_2_opt:', tour_length(tour, dist), 'miles', tour)
     tour = link_3_opt(tour, dist)
-    print(f'link_3_opt: {tour_length(tour, dist)} miles {tour}')
+    print('link_3_opt:', tour_length(tour, dist), 'miles', tour)
 
 
 # random.seed(1)
