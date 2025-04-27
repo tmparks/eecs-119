@@ -1,5 +1,12 @@
+//! Programming Assignment 1: Part Two
+
 use std::fs;
 
+/// Read a sequence of words from a file and print them.
+/// Line breaks in the input are discarded.
+/// Any input after the % character is discarded.
+/// A new line is started after any word that starts with r, s, or t.
+/// One blank is printed between words on the same line.
 fn main() {
     let file_name = "lab01c.txt";
     let mut content = String::new();

@@ -1,9 +1,13 @@
+//! Programming Assignment 1: Part Two
+
 use std::fs;
 
 fn main() {
     two_largest(read_sequence("lab01b.txt"));
 }
 
+/// Read a sequence of integers from a file.
+/// The sequence is preceded by an integer indicating the length of the sequence.
 fn read_sequence(file_name: &str) -> Vec<i32> {
     let content = fs::read_to_string(file_name).unwrap();
     let mut iterator = content
@@ -15,6 +19,7 @@ fn read_sequence(file_name: &str) -> Vec<i32> {
     sequence
 }
 
+/// Print the two largest distinct values from a sequence of integers.
 fn two_largest(sequence: Vec<i32>) {
     let mut largest = i32::MIN;
     let mut next_largest = i32::MIN;
