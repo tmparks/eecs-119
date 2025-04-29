@@ -1,36 +1,33 @@
 //! Programming Assignment 1: Part Two
 
 use std::fs;
+use std::str::FromStr;
 
+/// Read a sequence of integers from a file
+/// and print the two largest distinct values.
+/// The sequence is preceded by an integer indicating its length.
 fn main() {
-    two_largest(read_sequence("lab01b.txt"));
-}
-
-/// Read a sequence of integers from a file.
-/// The sequence is preceded by an integer indicating the length of the sequence.
-fn read_sequence(file_name: &str) -> Vec<i32> {
-    let content = fs::read_to_string(file_name).unwrap();
-    let mut iterator = content
-        .split_whitespace()
-        .map(|word| word.parse::<i32>().unwrap());
-    let length = iterator.next().unwrap();
-    let sequence: Vec<_> = iterator.collect();
-    assert_eq!(length as usize, sequence.len());
-    sequence
-}
-
-/// Print the two largest distinct values from a sequence of integers.
-fn two_largest(sequence: Vec<i32>) {
-    let mut largest = i32::MIN;
-    let mut next_largest = i32::MIN;
-    for number in sequence {
-        if largest < number {
-            next_largest = largest;
-            largest = number;
-        } else if next_largest < number && number != largest {
-            next_largest = number;
-        }
+    let file_name = "lab01b.txt";
+    let mut content = String::new(); // initially empty
+    if let Ok(file_content) = fs::read_to_string(file_name) {
+        content = file_content;
     }
-    println!("Largest value in sequence: {largest}");
-    println!("Next largest value: {next_largest}");
+    let mut sequence = content.split_whitespace().map(i32::from_str).flatten();
+    if let Some(expected_length) = sequence.next() {
+        let mut largest = i32::MIN;
+        let mut next_largest = i32::MIN;
+        let mut actual_length = 0;
+        for number in sequence {
+            if largest < number {
+                next_largest = largest;
+                largest = number;
+            } else if next_largest < number && number != largest {
+                next_largest = number;
+            }
+            actual_length += 1;
+        }
+        assert_eq!(actual_length, expected_length);
+        println!("Largest value in sequence: {largest}");
+        println!("Next largest value: {next_largest}");
+    }
 }

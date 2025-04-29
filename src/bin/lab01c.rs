@@ -9,7 +9,7 @@ use std::fs;
 /// One blank is printed between words on the same line.
 fn main() {
     let file_name = "lab01c.txt";
-    let mut content = String::new();
+    let mut content = String::new(); //initially empty
     if let Ok(file_content) = fs::read_to_string(file_name) {
         content = file_content;
     }
