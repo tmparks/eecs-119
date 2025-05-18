@@ -205,8 +205,8 @@ impl Document {
     }
 }
 
-/// Splits a string on the first occurence of whitespace
-/// and returns the prefix/suffix before/after the whitespace.
+/// Split a string on the first occurence of whitespace
+/// and return the prefix/suffix before/after the whitespace.
 /// The suffix is empty if the string contains no whitespace.
 fn split_once_whitespace(text: &str) -> (&str, &str) {
     let (prefix, suffix) = text.split_once(char::is_whitespace).unwrap_or((text, ""));
