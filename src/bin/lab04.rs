@@ -124,7 +124,7 @@ impl Document {
                         self.next.indent = arg.parse::<usize>()?;
                         self.paragraph(0)?;
                         self.label(remainder)?;
-                    },
+                    }
                     ".W" => self.next.width = arg.parse::<usize>()?,
                     ".I" => self.next.indent = arg.parse::<usize>()?,
                     ".M" => self.next.margin = arg.parse::<usize>()?,
