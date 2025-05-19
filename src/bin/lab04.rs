@@ -1,7 +1,7 @@
 //! Programming Assignment 4: Text formatter
 
 use std::error::Error;
-use std::fs;
+use std::fs::read_to_string;
 
 /// Demonstrate a text formatter.
 fn main() -> Result<(), Box<dyn Error>> {
@@ -54,14 +54,14 @@ struct Document {
     /// Formatting parameters for next paragraph.
     next: Paragraph,
 
-    /// Buffer for building current line.
-    line: String,
+    /// Content of the current line before the first word.
+    prefix: String,
 
-    /// Words to be appended to the current [line][Self::line].
+    /// Words of the current line.
     words: Vec<String>,
 
     /// Current estimate for line length.
-    /// Includes [line][Self::line], [words][Self::words]
+    /// Includes [prefix][Self::prefix], [words][Self::words]
     /// and space for one blank after each word.
     length: usize,
 
@@ -77,7 +77,7 @@ impl Default for Document {
         Document {
             current: Paragraph::default(),
             next: Paragraph::default(),
-            line: String::default(),
+            prefix: String::default(),
             words: Vec::default(),
             length: 0,
             do_format: true,
@@ -89,7 +89,7 @@ impl Default for Document {
 impl Document {
     /// Produce formatted output from a text file with embedded commands.
     fn format(&mut self, file_name: &str) -> Result<(), Box<dyn Error>> {
-        let content = fs::read_to_string(file_name)?;
+        let content = read_to_string(file_name)?;
         for line in content.lines() {
             if !self.do_format && !line.starts_with(".FI") {
                 println!("{line}");
@@ -107,8 +107,8 @@ impl Document {
         let (cmd, remainder) = split_once_whitespace(line);
         // commands without arguments
         match cmd {
-            ".PP" => self.paragraph(5)?,
-            ".LP" => self.paragraph(0)?,
+            ".PP" => self.paragraph(5, "")?,
+            ".LP" => self.paragraph(0, "")?,
             ".JST" => self.next.do_justify = true,
             ".NJST" => self.next.do_justify = false,
             ".FI" => self.do_format = true,
@@ -122,8 +122,7 @@ impl Document {
                 match cmd {
                     ".IP" => {
                         self.next.indent = arg.parse::<usize>()?;
-                        self.paragraph(0)?;
-                        self.label(remainder)?;
+                        self.paragraph(0, remainder)?;
                     }
                     ".W" => self.next.width = arg.parse::<usize>()?,
                     ".I" => self.next.indent = arg.parse::<usize>()?,
@@ -150,30 +149,24 @@ impl Document {
     }
 
     /// Process a paragraph.
-    fn paragraph(&mut self, indent: usize) -> Result<(), Box<dyn Error>> {
+    fn paragraph(&mut self, indent: usize, mut label: &str) -> Result<(), Box<dyn Error>> {
         self.print_line(false)?; // last line is never justified
         if !self.is_first_line {
             println!(); // blank line
         }
         self.current = self.next;
-        self.length = self.current.indent + indent; // exclude margin
-        self.line = " ".repeat(self.current.margin + self.length);
-        Ok(())
-    }
-
-    /// Process a paragraph label.
-    fn label(&mut self, mut label: &str) -> Result<(), Box<dyn Error>> {
         if label.starts_with('<') && label.ends_with('>') {
             label = label.strip_prefix('<').ok_or("missing prefix")?;
             label = label.strip_suffix('>').ok_or("missing suffix")?;
         }
         let length = label.chars().count();
-        let mut pad = 1;
-        if self.current.indent > length {
-            pad = self.current.indent - length;
+        let indent = self.current.indent + indent;
+        let mut pad = indent - length;
+        if length > 0 && length >= indent {
+            pad = 1;
         }
         self.length = length + pad; // exclude margin
-        self.line = " ".repeat(self.current.margin) + &label + &" ".repeat(pad);
+        self.prefix = " ".repeat(self.current.margin) + &label + &" ".repeat(pad);
         Ok(())
     }
 
@@ -187,18 +180,20 @@ impl Document {
             let gaps = self.words.len() - 1;
             self.length -= self.words.len(); // remove blank after each word
             let mut remaining_pad = width - self.length;
+
+            print!("{}", self.prefix);
             for n in 0..gaps {
                 let remaining_gaps = gaps - n;
                 let pad = rounding_div(remaining_pad, remaining_gaps);
-                self.line += &self.words[n];
-                self.line += &" ".repeat(pad);
+                print!("{}{}", self.words[n], " ".repeat(pad));
                 remaining_pad -= pad;
             }
-            self.line += self.words.last().ok_or("missing word")?;
-            println!("{}{}", self.line, "\n".repeat(self.current.space));
+            println!("{}", self.words.last().ok_or("missing word")?);
+            print!("{}", "\n".repeat(self.current.space));
+
             self.words.clear();
             self.length = self.current.indent; // exclude margin
-            self.line = " ".repeat(self.current.margin + self.length);
+            self.prefix = " ".repeat(self.current.margin + self.length);
             self.is_first_line = false;
         }
         Ok(())
