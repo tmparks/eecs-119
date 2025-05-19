@@ -4,10 +4,10 @@ use std::error::Error;
 use std::fs::read_to_string;
 
 /// An empty, generic result.
-type Result = std::result::Result<(), Box<dyn Error>>;
+type UnitResult = std::result::Result<(), Box<dyn Error>>;
 
 /// Demonstrate a text formatter.
-fn main() -> Result {
+fn main() -> UnitResult {
     println!("1234567890123456789012345678901234567890");
     let mut doc = Document::default();
     doc.format("lab04a.txt")?;
@@ -92,7 +92,7 @@ impl Default for Document {
 /// Functions for formatting a document.
 impl Document {
     /// Produce formatted output from a text file with embedded commands.
-    fn format(&mut self, file_name: &str) -> Result {
+    fn format(&mut self, file_name: &str) -> UnitResult {
         let content = read_to_string(file_name)?;
         for line in content.lines() {
             if !self.do_format && !line.starts_with(".FI") {
@@ -107,7 +107,7 @@ impl Document {
     }
 
     /// Process a command.
-    fn command(&mut self, line: &str) -> Result {
+    fn command(&mut self, line: &str) -> UnitResult {
         let (cmd, remainder) = split_once_whitespace(line);
         // commands without arguments
         match cmd {
@@ -140,7 +140,7 @@ impl Document {
     }
 
     /// Process a line of text.
-    fn text(&mut self, line: &str) -> Result {
+    fn text(&mut self, line: &str) -> UnitResult {
         for word in line.split_whitespace() {
             let length = word.chars().count();
             if self.length + length > self.current.limit {
@@ -153,7 +153,7 @@ impl Document {
     }
 
     /// Process a paragraph.
-    fn paragraph(&mut self, indent: usize, mut label: &str) -> Result {
+    fn paragraph(&mut self, indent: usize, mut label: &str) -> UnitResult {
         self.print_line(false)?; // last line is never justified
         if !self.is_first_line {
             println!(); // blank line
@@ -176,7 +176,7 @@ impl Document {
     }
 
     /// Print a line of text (with optional justification)
-    fn print_line(&mut self, do_justify: bool) -> Result {
+    fn print_line(&mut self, do_justify: bool) -> UnitResult {
         if self.words.len() > 0 {
             let gaps = self.words.len() - 1;
             let limit = if do_justify {
