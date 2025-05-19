@@ -3,8 +3,11 @@
 use std::error::Error;
 use std::fs::read_to_string;
 
+/// An empty, generic result.
+type Result = std::result::Result<(), Box<dyn Error>>;
+
 /// Demonstrate a text formatter.
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result {
     println!("1234567890123456789012345678901234567890");
     let mut doc = Document::default();
     doc.format("lab04a.txt")?;
@@ -18,16 +21,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 /// Formatting parameters for a paragraph.
 #[derive(Clone, Copy)]
 struct Paragraph {
-    /// Line width limit.
-    width: usize,
+    /// Line length limit.
+    limit: usize,
 
     /// Vertical space between lines.
     space: usize,
 
-    /// Indentation. Included in [width][Self::width].
+    /// Indentation. Included in [`limit`][Self::limit].
     indent: usize,
 
-    /// Margin. Not included in [width][Self::width].
+    /// Margin. Not included in [`limit`][Self::limit].
     margin: usize,
 
     /// Insert blanks between words so that lines are right justified.
@@ -37,7 +40,7 @@ struct Paragraph {
 impl Default for Paragraph {
     fn default() -> Paragraph {
         Paragraph {
-            width: 40,
+            limit: 40,
             space: 0,
             indent: 0,
             margin: 0,
@@ -61,7 +64,7 @@ struct Document {
     words: Vec<String>,
 
     /// Current estimate for line length.
-    /// Includes [prefix][Self::prefix], [words][Self::words]
+    /// Includes [`prefix`][Self::prefix], [`words`][Self::words]
     /// and space for one blank after each word.
     length: usize,
 
@@ -86,9 +89,10 @@ impl Default for Document {
     }
 }
 
+/// Functions for formatting a document.
 impl Document {
     /// Produce formatted output from a text file with embedded commands.
-    fn format(&mut self, file_name: &str) -> Result<(), Box<dyn Error>> {
+    fn format(&mut self, file_name: &str) -> Result {
         let content = read_to_string(file_name)?;
         for line in content.lines() {
             if !self.do_format && !line.starts_with(".FI") {
@@ -103,7 +107,7 @@ impl Document {
     }
 
     /// Process a command.
-    fn command(&mut self, line: &str) -> Result<(), Box<dyn Error>> {
+    fn command(&mut self, line: &str) -> Result {
         let (cmd, remainder) = split_once_whitespace(line);
         // commands without arguments
         match cmd {
@@ -124,7 +128,7 @@ impl Document {
                         self.next.indent = arg.parse::<usize>()?;
                         self.paragraph(0, remainder)?;
                     }
-                    ".W" => self.next.width = arg.parse::<usize>()?,
+                    ".W" => self.next.limit = arg.parse::<usize>()?,
                     ".I" => self.next.indent = arg.parse::<usize>()?,
                     ".M" => self.next.margin = arg.parse::<usize>()?,
                     ".SP" => self.next.space = arg.parse::<usize>()?,
@@ -136,10 +140,10 @@ impl Document {
     }
 
     /// Process a line of text.
-    fn text(&mut self, line: &str) -> Result<(), Box<dyn Error>> {
+    fn text(&mut self, line: &str) -> Result {
         for word in line.split_whitespace() {
             let length = word.chars().count();
-            if self.length + length > self.current.width {
+            if self.length + length > self.current.limit {
                 self.print_line(self.current.do_justify)?;
             }
             self.words.push(word.to_string());
@@ -149,7 +153,7 @@ impl Document {
     }
 
     /// Process a paragraph.
-    fn paragraph(&mut self, indent: usize, mut label: &str) -> Result<(), Box<dyn Error>> {
+    fn paragraph(&mut self, indent: usize, mut label: &str) -> Result {
         self.print_line(false)?; // last line is never justified
         if !self.is_first_line {
             println!(); // blank line
@@ -160,26 +164,28 @@ impl Document {
             label = label.strip_suffix('>').ok_or("missing suffix")?;
         }
         let length = label.chars().count();
-        let indent = self.current.indent + indent;
-        let mut pad = indent - length;
-        if length > 0 && length >= indent {
-            pad = 1;
-        }
-        self.length = length + pad; // exclude margin
-        self.prefix = " ".repeat(self.current.margin) + &label + &" ".repeat(pad);
+        let indent = indent + self.current.indent;
+        let indent = if indent > length || length == 0 {
+            indent - length
+        } else {
+            1
+        };
+        self.length = length + indent; // exclude margin
+        self.prefix = " ".repeat(self.current.margin) + &label + &" ".repeat(indent);
         Ok(())
     }
 
     /// Print a line of text (with optional justification)
-    fn print_line(&mut self, do_justify: bool) -> Result<(), Box<dyn Error>> {
+    fn print_line(&mut self, do_justify: bool) -> Result {
         if self.words.len() > 0 {
-            let mut width = self.length - 1; // remove blank after last word
-            if do_justify {
-                width = self.current.width;
-            }
             let gaps = self.words.len() - 1;
-            self.length -= self.words.len(); // remove blank after each word
-            let mut remaining_pad = width - self.length;
+            let limit = if do_justify {
+                self.current.limit
+            } else {
+                self.length - 1 // remove blank after last word
+            };
+            let length = self.length - self.words.len(); // remove blank after each word
+            let mut remaining_pad = limit - length;
 
             print!("{}", self.prefix);
             for n in 0..gaps {
