@@ -1,4 +1,4 @@
-///! Programming Assignment 6: N queens
+//! Programming Assignment 6: N queens
 
 /// Demonstrate N queens solution.
 fn main() {
@@ -22,7 +22,7 @@ fn solve(size: i32) -> Board {
 }
 
 /// Attempt to place a queen in the given row of an NxN board
-/// taking into account the positions of other queens.
+/// taking into account the positions occupied by other queens.
 /// Recursively attempt to place a queen in the next row
 /// and backtrack when necessary.
 /// Return true upon success.
@@ -46,7 +46,7 @@ fn solve_recursively(board: &mut Board, size: i32, row: i32) -> bool {
 }
 
 /// Test the safety of placing a queen in the given position
-/// taking into account the positions of other queens.
+/// taking into account the positions occupied by other queens.
 fn is_safe(board: &Board, position: (i32, i32)) -> bool {
     for occupied in board {
         if position.0 == occupied.0
