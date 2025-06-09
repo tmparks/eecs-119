@@ -154,12 +154,13 @@ impl Picture {
             let irow = urow as isize;
             for ucolumn in 0..self.columns {
                 let icolumn = ucolumn as isize;
-                if self.pixels[urow][ucolumn] == self.light {
+                let pixel_color = self.pixels[urow][ucolumn];
+                if pixel_color == self.light {
                     let color = self.light + self.light_regions.len() as Color + 1;
                     self.light_regions.insert(color);
                     let size = self.flood(irow, icolumn, self.light, color);
                     self.region_sizes.insert(color, size);
-                } else if self.pixels[urow][ucolumn] == self.dark {
+                } else if pixel_color == self.dark {
                     let color = self.dark - self.dark_regions.len() as Color - 1;
                     self.dark_regions.insert(color);
                     let size = self.flood(irow, icolumn, self.dark, color);
@@ -237,15 +238,15 @@ impl Picture {
             let irow = urow as isize;
             for ucolumn in 0..self.columns {
                 let icolumn = ucolumn as isize;
-                let color = self.pixels[urow][ucolumn];
-                if dark_regions.contains(&color) {
+                let pixel_color = self.pixels[urow][ucolumn];
+                if dark_regions.contains(&pixel_color) {
                     if self
-                        .neighbors(irow, icolumn, color)
+                        .neighbors(irow, icolumn, pixel_color)
                         .is_subset(&light_regions)
                     {
-                        result.insert(color);
+                        result.insert(pixel_color);
                     }
-                    self.flood(irow, icolumn, self.neutral, color);
+                    self.flood(irow, icolumn, self.neutral, pixel_color);
                 }
             }
         }
