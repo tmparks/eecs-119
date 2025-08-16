@@ -30,7 +30,7 @@ will not occur.
 #include <algorithm>    // For std::sort
 
 int main() {
-    std::ifstream inputFile("input.txt");
+    std::ifstream inputFile("lab01b.txt");
     if (!inputFile) {
         std::cerr << "Error opening file." << std::endl;
         return 1;
