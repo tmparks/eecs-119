@@ -33,8 +33,9 @@ the output should be
 #include <string>
 #include <sstream>      // For std::stringstream
 #include <cctype>      // For std::isspace
+
 int main() {
-    std::ifstream inputFile("input.txt"); // Change to your input file
+    std::ifstream inputFile("lab01c.txt"); // Change to your input file
     if (!inputFile) {
         std::cerr << "Error opening file." << std::endl;
         return 1;
