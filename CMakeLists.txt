@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(eecs-119 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(lab01a lab01a.cpp)
+add_executable(lab01b lab01b.cpp)
+add_executable(lab01c lab01c.cpp)

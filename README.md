@@ -3,3 +3,6 @@
 EECS-119 was the introductory programming course for students intending to major
 in Electrical Engnieering and Computer Science. When pronounced aloud, the
 abbreviation EECS aptly rhymes with "geeks".
+
+All python and rust code has been crafted using traditional methods.
+All C++ code has been generated with assistance from artificial intelligence.
