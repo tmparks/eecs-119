@@ -5,3 +5,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(lab01a lab01a.cpp)
 add_executable(lab01b lab01b.cpp)
+add_executable(lab01c lab01c.cpp)
