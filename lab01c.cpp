@@ -43,28 +43,53 @@ int main() {
     std::string word;
     std::stringstream outputStream;
 
-    while (inputFile >> word) {
-        if (word == "%") {
+    bool lastWasWord = false;
+    char ch;
+    while (inputFile.get(ch)) {
+        if (ch == '%') {
             break; // Terminate on '%'
         }
-
-        // Ignore line breaks and multiple spaces
-        if (outputStream.tellp() > 0) {
-            outputStream << ' '; // Add a single space before the next word
-        }
-
-        outputStream << word;
-
-        // Check if the word starts with 'r', 's', or 't'
-        if (word[0] == 'r' || word[0] == 's' || word[0] == 't') {
-            outputStream << '\n'; // Start a new line
+        if (std::isspace(static_cast<unsigned char>(ch))) {
+            // Ignore line breaks and multiple spaces between words
+            if (!word.empty()) {
+                // Output the word
+                if (lastWasWord) {
+                    outputStream << ' ';
+                }
+                outputStream << word;
+                char firstChar = std::tolower(static_cast<unsigned char>(word[0]));
+                if (firstChar == 'r' || firstChar == 's' || firstChar == 't') {
+                    outputStream << '\n';
+                    lastWasWord = false;
+                } else {
+                    lastWasWord = true;
+                }
+                word.clear();
+            }
+            // Otherwise, just skip extra spaces
+        } else {
+            word += ch;
         }
     }
-
+    // Output the last word if any
+    if (!word.empty()) {
+        if (lastWasWord) {
+            outputStream << ' ';
+        }
+        outputStream << word;
+        char firstChar = std::tolower(static_cast<unsigned char>(word[0]));
+        if (firstChar == 'r' || firstChar == 's' || firstChar == 't') {
+            outputStream << '\n';
+        }
+    }
     inputFile.close();
 
-    // Output the result
-    std::cout << outputStream.str() << std::endl;
+    // Output the result, trimming trailing newline if present
+    std::string result = outputStream.str();
+    if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
+    }
+    std::cout << result << std::endl;
 
     return 0;
 }
