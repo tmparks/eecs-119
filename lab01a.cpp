@@ -1,8 +1,12 @@
 /*
 Write a program that computes the following two sums:
+
     1E12 + 1/1 + 1/2 + 1/3 + ... + 1/999 + 1/1000 - 1E12
+
 and
+
     1/1 + 1/2 + 1/3 + ... + 1/999 + 1/1000
+
 The sums should be computed from left to right, that is, adding the second term to the first, the
 third to the resulting sum, the fourth to the new sum, and so on.
 
