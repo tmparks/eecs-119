@@ -58,7 +58,7 @@ x^(2(n-1)+1).
 #include <limits>       // For std::numeric_limits
 
 int main() {
-    double x;
+    double x = 0.0;
     std::cout << "Enter a value for x (0 < x <= 1): ";
     std::cin >> x;
 
@@ -73,23 +73,29 @@ int main() {
     }
 
     double I_x = 0.0; // The computed value of I(x)
-    double term = x; // The first term (n=0)
-    int n = 0; // Term index
+    double term; // The current term in the series
+    int n; // Term index
     const double tolerance = 1E-6; // Stopping condition for the term value
     const int max_iterations = 15; // Maximum number of iterations
 
-    double x_power = x; // x^(2n+1), initially for n=0
+    double x_power; // x^(2n+1), initially for n=0
+    double factorial; // n! for current n
 
     bool stopped_due_to_small_term = false;
-    for (; n < max_iterations; ++n) {
+
+    // Initialize variables before the loop
+    term = x; // The first term (n=0)
+    x_power = x; // x^(2n+1), initially for n=0
+    factorial = 1.0; // n! for current n
+
+    for (n = 0; n < max_iterations; ++n) {
         I_x += term;
 
         // Compute the next term in the series
-        static double factorial = 1.0; // n! for current n, static to preserve value across iterations
         factorial *= (n + 1); // Update factorial for next n
         x_power *= x * x; // Update x_power for next n: x^(2n+1) = x^(2n-1+1) * x^2 (multiplying by x*x advances the exponent by 2)
 
-        double sign = std::pow(-1, n + 1);
+        int sign = (n % 2 == 0) ? -1 : 1;
         double numerator = sign * x_power;
         double denominator = factorial * (2 * (n + 1) + 1);
         term = numerator / denominator;
