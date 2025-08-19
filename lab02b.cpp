@@ -63,6 +63,11 @@ int main() {
     std::cout << "Enter a value for x (0 < x <= 1): ";
     std::cin >> x;
 
+    if (std::cin.fail()) {
+        std::cerr << "Error: Invalid input. Please enter a numeric value for x." << std::endl;
+        return 1;
+    }
+
     if (x <= 0 || x > 1) {
         std::cerr << "Error: x must be greater than 0 and less than or equal to 1." << std::endl;
         return 1;
@@ -74,27 +79,36 @@ int main() {
     const double tolerance = 1E-6; // Stopping condition for the term value
     const int max_iterations = 15; // Maximum number of iterations
 
-    while (std::abs(term) > tolerance && n < max_iterations) {
+    double x_power = x; // x^(2n+1), initially for n=0
+
+    bool stopped_due_to_small_term = false;
+    for (; n < max_iterations; ++n) {
         I_x += term;
-        n++;
-        
+
         // Compute the next term in the series
         double factorial = 1.0; // n! for current n
-        for (int i = 1; i <= n; ++i) {
+        for (int i = 1; i <= n + 1; ++i) {
             factorial *= i;
         }
-        
-        double exponent = std::pow(x, 2 * n + 1);
-        term = ((n % 2 == 0) ? -1 : 1) * exponent / (factorial * (2 * n + 1));
+        x_power *= x * x; // Update x_power for next n: x^(2n+1) = x^(2(n-1)+1) * x^2
+
+        int sign = ((n + 1) % 2 == 0) ? 1 : -1;
+        double numerator = sign * x_power;
+        double denominator = factorial * (2 * (n + 1) + 1);
+        term = numerator / denominator;
+
+        if (std::abs(term) < tolerance) {
+            stopped_due_to_small_term = true;
+            break;
+        }
     }
 
-    std::cout << std::fixed << std::setprecision(6);
-    if (std::abs(term) <= tolerance) {
+    if (stopped_due_to_small_term) {
         std::cout << "Stopped due to small term: " << term << std::endl;
     } else {
         std::cout << "Stopped after reaching maximum iterations: " << max_iterations << std::endl;
     }
-    
+
     std::cout << "Computed value of I(" << x << ") = " << I_x << std::endl;
     std::cout << "Last term computed: " << term << std::endl;
 
