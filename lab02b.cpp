@@ -85,13 +85,11 @@ int main() {
         I_x += term;
 
         // Compute the next term in the series
-        double factorial = 1.0; // n! for current n
-        for (int i = 1; i <= n + 1; ++i) {
-            factorial *= i;
-        }
-        x_power *= x * x; // Update x_power for next n: x^(2n+1) = x^(2(n-1)+1) * x^2
+        static double factorial = 1.0; // n! for current n, static to preserve value across iterations
+        factorial *= (n + 1); // Update factorial for next n
+        x_power *= x * x; // Update x_power for next n: x^(2n+1) = x^(2n-1+1) * x^2 (multiplying by x*x advances the exponent by 2)
 
-        int sign = ((n + 1) % 2 == 0) ? 1 : -1;
+        double sign = std::pow(-1, n + 1);
         double numerator = sign * x_power;
         double denominator = factorial * (2 * (n + 1) + 1);
         term = numerator / denominator;
@@ -108,6 +106,7 @@ int main() {
         std::cout << "Stopped after reaching maximum iterations: " << max_iterations << std::endl;
     }
 
+    std::cout << std::fixed << std::setprecision(8);
     std::cout << "Computed value of I(" << x << ") = " << I_x << std::endl;
     std::cout << "Last term computed: " << term << std::endl;
 
