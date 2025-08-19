@@ -23,11 +23,11 @@ fn integral(x: f64) -> (f64, f64, String) {
     let limit = 15;
     let mut reason = format!("Aborted after {} iterations", limit);
     for n in 1..limit {
+        numerator *= -x * x;
+        factorial *= n as f64;
         let denominator = factorial * (2.0 * (n as f64) + 1.0);
         term = numerator / denominator;
         result += term;
-        numerator *= -x * x;
-        factorial *= n as f64;
         if term.abs() < small_enough {
             reason = format!("Accurate after {} iterations", n + 1);
             break;

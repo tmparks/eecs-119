@@ -18,11 +18,11 @@ def integral(x):
     limit = 15
     reason = 'Aborted'
     for n in range(1, limit):
+        numerator *= -x * x
+        factorial *= n
         denominator = factorial * (2 * n + 1)
         term = numerator / denominator
         value += term
-        numerator *= -x * x
-        factorial *= n
         if abs(term) < small_enough:
             reason = 'Accurate'
             break
