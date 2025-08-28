@@ -117,15 +117,24 @@ double newcoyotes(double oldrabbits, double oldcoyotes) {
     return oldcoyotes + births - starvation_deaths;
 }
 
-//* Do not assume rabbits < coyotes
-//* Do not assume coyotes < rabbits
+//* Print a line of the form:
+//* if rabbit blanks < coyote blanks:  m |        'r'        'c'
+//* if rabbit blanks > coyote blanks:  m |        'c'        'r'
+//* if rabbit blanks == coyote blanks: m |             'x'
+//* Remember that the 'r' or 'c' character replaces a blank!
 void printline(int month, double rabbits, double coyotes) {
-    int rabbit_spaces = static_cast<int>(std::round(rabbits / 100.0));
-    int coyote_spaces = static_cast<int>(std::round(coyotes * 2.0));
-    
-    std::cout << std::setw(3) << month << " |"
-              << std::string(rabbit_spaces, ' ') << "r"
-              << std::string(coyote_spaces, ' ') << "c" << std::endl;
+    int rabbit_blanks = static_cast<int>(std::round(rabbits / 100.0));
+    int coyote_blanks = static_cast<int>(std::round(coyotes * 2.0));
+    std::cout << std::setw(4) << month << " |";
+    if (rabbit_blanks < coyote_blanks) {
+        std::cout << std::string(rabbit_blanks, ' ') << 'r'
+                  << std::string(coyote_blanks - rabbit_blanks - 1, ' ') << 'c' << std::endl;
+    } else if (rabbit_blanks > coyote_blanks) {
+        std::cout << std::string(coyote_blanks, ' ') << 'c'
+                  << std::string(rabbit_blanks - coyote_blanks - 1, ' ') << 'r' << std::endl;
+    } else {
+        std::cout << std::string(rabbit_blanks, ' ') << 'x' << std::endl;
+    }
 }
 
 int main() {
@@ -144,24 +153,26 @@ int main() {
         }
         
         //* Introduce coyotes in month 50
+        if (month == 50) {
+            coyotes = 10.0;
+        }
         double new_rabbits = newrabbits(rabbits, coyotes);
-        double new_coyotes = (month >= 50) ? newcoyotes(rabbits, coyotes) : coyotes;
-        
-        double rabbit_change = std::abs(new_rabbits - rabbits);
-        double coyote_change = std::abs(new_coyotes - coyotes);
-        
+        double new_coyotes = newcoyotes(rabbits, coyotes);
+        double rabbit_change = new_rabbits - rabbits;
+        double coyote_change = new_coyotes - coyotes;
         rabbits = new_rabbits;
         coyotes = new_coyotes;
-        
-        if (month >= 50 && (rabbit_change / rabbits < change_threshold) && (coyote_change / coyotes < change_threshold)) {
-            std::cout << "Populations stabilized after " << month << " months." << std::endl;
-            break;
+        if (rabbits < 0) rabbits = 0;
+        if (coyotes < 0) coyotes = 0;
+        if (month > 0) {
+            if (std::abs(rabbit_change) / rabbits < change_threshold &&
+                std::abs(coyote_change) / coyotes < change_threshold) {
+                break;
+            }
         }
     }
-    
     std::cout << "Final populations after simulation:" << std::endl;
-    std::cout << "Rabbits: " << static_cast<int>(std::round(rabbits)) << std::endl;
-    std::cout << "Coyotes: " << static_cast<int>(std::round(coyotes)) << std::endl;
-    
+    std::cout << "Rabbits: " << std::fixed << std::setprecision(2) << rabbits << std::endl;
+    std::cout << "Coyotes: " << std::fixed << std::setprecision(2) << coyotes << std::endl;
     return 0;
 }
