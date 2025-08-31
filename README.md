@@ -36,3 +36,7 @@ All C++ code was generated entirely by artificial intelligence.
     [py](lab03a.py)
     [rs](src/bin/lab03a.rs)
     [cpp](lab03a.cpp)
+  * [Part Two:](lab03b.md)
+    [py](lab03b.py)
+    [rs](src/bin/lab03b.rs)
+    [cpp](lab03b.cpp)
