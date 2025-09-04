@@ -124,7 +124,7 @@ the whole output away from the left end of the line printer paper.</dd>
 
 ### For those who like a challenge
 
-<dl style="text-align:justify">
+<dl>
 <dt>.JST</dt>
 <dd>Starting with the next paragraph your formatter should insert blanks between
 words in a line so the last character of each line (except the last line of each
@@ -139,17 +139,14 @@ solution to this problem.</dd>
 paragraph.</dd>
 </dl>
 
-For examples of text produced with the ".JST" command,
-see the two paragraphs above.
-
 ### For Hot Shots
 
 <dl>
-<dt>.IP NN <L></dt>
+<dt>.IP NN &lt;L&gt;</dt>
 <dd>A new paragraph should be started with the first word following the command.
 The new paragraph should be separated from the previous paragraph by a blank
 line. All the lines of the new paragraph should be indented "NN" characters.
-The "<L>" which is called the "paragraph label" and is whatever appears
+The "&lt;L&gt;" which is called the "paragraph label" and is whatever appears
 immediately after "NN" enclosed in angled brackets, is to be placed in the first
 line of the paragraph with its first character in the first output column. You
 may assume that the number of characters inside the brackets is less than "NN".
