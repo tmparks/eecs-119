@@ -88,9 +88,9 @@ beginning of the fiftieth month when ten coyotes are introduced.
 
 I recommend that you use three functions with the following signatures:
 
-    double newrabbits(double oldrabbits, double oldcoyotes);
-    double newcoyotes(double oldrabbits, double oldcoyotes);
-    void printline(int month, double rabbits, double coyotes);
+    newrabbits(oldrabbits: float, oldcoyotes: float) -> float
+    newcoyotes(oldrabbits: float, oldcoyotes: float) -> float
+    printline(month: int, rabbits: float, coyotes: float) -> None
 
 The first function will compute the number of rabbits alive during a month when
 given the number of rabbits and coyotes alive during the previous month. The
