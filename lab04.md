@@ -1,4 +1,3 @@
-<style>body{text-align:justify}</style>
 # Programming Assignment 4
 ## Text formatter
 
@@ -125,7 +124,7 @@ the whole output away from the left end of the line printer paper.</dd>
 
 ### For those who like a challenge
 
-<dl>
+<dl style="text-align:justify">
 <dt>.JST</dt>
 <dd>Starting with the next paragraph your formatter should insert blanks between
 words in a line so the last character of each line (except the last line of each
@@ -140,7 +139,8 @@ solution to this problem.</dd>
 paragraph.</dd>
 </dl>
 
-For examples of text produced with the ".JST" command, see this handout.
+For examples of text produced with the ".JST" command,
+see the two paragraphs above.
 
 ### For Hot Shots
 
