@@ -74,7 +74,7 @@ paragraph command (".LP"' or ".PP").
 
 For example, if the input is:
 
-    W•33
+    .W•33
     .PP
     Here•is•a•sample•••paragraph•which•starts•the•fle.
     This•paragraph•doesn't•••••make•much•sense.
