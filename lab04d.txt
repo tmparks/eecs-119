@@ -1,3 +1,4 @@
+.W 40
 .JST
 .PP
 With the ".JST" command, insert blanks between words in a line so that the last

@@ -1,3 +1,4 @@
+.W 40
 .IP 11 <.IP NN <L>>
 With the ".IP" command, all lines of the new paragraph
 should be indented by the specified number of characters.

@@ -7,7 +7,7 @@ abbreviation EECS aptly rhymes with "geeks".
 All python and rust code was crafted using traditional methods.
 All C++ code was generated entirely by artificial intelligence.
 
-* * *
+----------------------------------------
 
 * Programming Assignment 1
   * [Part One:](lab01a.md)
@@ -40,3 +40,7 @@ All C++ code was generated entirely by artificial intelligence.
     [py](lab03b.py)
     [rs](src/bin/lab03b.rs)
     [cpp](lab03b.cpp)
+* [Programming Assignment 4:](lab04.md)
+  [py](lab04.py)
+  [rs](src/bin/lab04.rs)
+  [cpp](lab04.cpp)
