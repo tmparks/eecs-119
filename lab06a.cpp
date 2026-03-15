@@ -1,6 +1,8 @@
 //* Translate the PASCAL program described in the file lab06a.md into C++
 //* then find and fix the bugs
 
+//* Fix the bugs in the file lab06a.cpp
+
 #include <iostream>
 #include <vector>
 
@@ -24,7 +26,10 @@ void quicksort(vector<int>& n, int low, int high) {
         for (int j = low; j < high; j++) {
             if (n[j] <= pivot) {
                 i++;
-                swap_elements(n, i, j);  // Note: This swap doesn't increment/decrement as in original, but swaps values
+                // Simple swap without modifying indices
+                int temp = n[i];
+                n[i] = n[j];
+                n[j] = temp;
             }
         }
         // Swap pivot to correct position
