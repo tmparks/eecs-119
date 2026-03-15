@@ -29,8 +29,8 @@ class Plotter:
         """
         Move the imaginary pen without drawing any output.
         """
-        self.row = row
-        self.column = column
+        self.row = row - 1  # row 1 is at the bottom of the page
+        self.column = column - 1  # column 1 is at the left of the page
 
     def step(self, n):
         """
