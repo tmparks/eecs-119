@@ -96,8 +96,8 @@ impl Plotter {
 
     /// Move the imaginary pen without drawing a point.
     fn r#move(&mut self, row: f64, column: f64) {
-        self.row = row;
-        self.column = column;
+        self.row = row - 1.0; // row 1 is at the bottom of the page
+        self.column = column - 1.0; // column 1 is at the left of the page
     }
 
     /// Move the imaginary pen, drawing output after each step.
