@@ -1,11 +1,10 @@
 //* Translate the PASCAL program described in the file lab06c.md into C++
 
+//* Remove unused variables in the file lab06c.cpp
+
 #include <iostream>
-#include <map>
 
 using namespace std;
-
-map<int, int> memo;
 
 auto g(int x) -> int;
 
