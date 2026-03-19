@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 project(eecs-119 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CAMAKE_CXX_EXTENSIONS OFF)
+add_compile_options(
+    -Wall
+    -Wextra
+    -Wpedantic
+)
 
 add_executable(lab01a lab01a.cpp)
 add_executable(lab01b lab01b.cpp)
@@ -14,3 +20,4 @@ add_executable(lab04 lab04.cpp)
 add_executable(lab05 lab05.cpp)
 add_executable(lab06a lab06a.cpp)
 add_executable(lab06b lab06b.cpp)
+add_executable(lab06c lab06c.cpp)
