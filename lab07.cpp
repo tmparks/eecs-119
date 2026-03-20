@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <vector>
-#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -18,21 +18,6 @@ void print_picture() {
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             cout << (picture[r][c] == 1 ? '*' : '-');
-        }
-        cout << "\n";
-    }
-    cout << "\n";
-}
-
-void print_picture_by_region(int min_size, int max_size) {
-    for (auto r = 0; r < rows; ++r) {
-        for (auto c = 0; c < cols; ++c) {
-            auto region_id = picture[r][c];
-            if (region_id > 0 && region_id <= max_size + 1000 && region_id > min_size + 1000) {
-                cout << '*';
-            } else {
-                cout << '-';
-            }
         }
         cout << "\n";
     }
@@ -63,9 +48,9 @@ int main() {
     cin.ignore();
     
     for (auto r = 0; r < rows; ++r) {
-        auto line = "";
+        auto line = string();
         getline(cin, line);
-        for (auto c = 0; c < cols && c < line.size(); ++c) {
+        for (auto c = 0; c < cols && c < (int)line.size(); ++c) {
             picture[r][c] = (line[c] == '*' ? 1 : 0);
         }
     }
@@ -113,7 +98,7 @@ int main() {
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             auto rid = picture[r][c] - 1000;
-            if (rid > 0 && rid <= region_sizes.size() && region_sizes[rid - 1] >= 1 && region_sizes[rid - 1] <= 20) {
+            if (rid > 0 && rid <= (int)region_sizes.size() && region_sizes[rid - 1] >= 1 && region_sizes[rid - 1] <= 20) {
                 cout << '*';
             } else {
                 cout << '-';
@@ -127,7 +112,7 @@ int main() {
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             auto rid = picture[r][c] - 1000;
-            if (rid > 0 && rid <= region_sizes.size() && region_sizes[rid - 1] >= 21 && region_sizes[rid - 1] <= 40) {
+            if (rid > 0 && rid <= (int)region_sizes.size() && region_sizes[rid - 1] >= 21 && region_sizes[rid - 1] <= 40) {
                 cout << '*';
             } else {
                 cout << '-';
@@ -141,7 +126,7 @@ int main() {
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             auto rid = picture[r][c] - 1000;
-            if (rid > 0 && rid <= region_sizes.size() && region_sizes[rid - 1] >= 41 && region_sizes[rid - 1] <= 80) {
+            if (rid > 0 && rid <= (int)region_sizes.size() && region_sizes[rid - 1] >= 41 && region_sizes[rid - 1] <= 80) {
                 cout << '*';
             } else {
                 cout << '-';
@@ -155,7 +140,7 @@ int main() {
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             auto rid = picture[r][c] - 1000;
-            if (rid > 0 && rid <= region_sizes.size() && region_sizes[rid - 1] > 80) {
+            if (rid > 0 && rid <= (int)region_sizes.size() && region_sizes[rid - 1] > 80) {
                 cout << '*';
             } else {
                 cout << '-';
