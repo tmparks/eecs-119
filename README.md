@@ -61,3 +61,7 @@ All C++ code was generated entirely by artificial intelligence.
     [py](lab06c.py)
     [rs](src/bin/lab06c.rs)
     [cpp](lab06c.cpp)
+* [Programming Assignment 7:](lab07.md)
+  [py](lab07.py)
+  [rs](src/bin/lab07.rs)
+  [cpp](lab07.cpp)
