@@ -1,5 +1,10 @@
 //* Write a C++ program for the instructions in the file lab07.md
 
+//* Expand the program in lab07.cpp to implement Part Four
+//* of the instructions in the file lab07.md
+
+//* Fix the errors in the file lab07.cpp
+
 #include <iostream>
 #include <vector>
 #include <string>
