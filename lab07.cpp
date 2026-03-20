@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <array>      // needed for std::array
+#include <algorithm>  // needed for std::find
 
 using namespace std;
 
@@ -42,24 +44,20 @@ auto dfs(int r, int c, int region_id) -> int {
 }
 
 auto is_enclosed_region(int region_code) -> bool {
-    // region_code is e.g. region_id + 1000
     auto seen = vector<vector<bool>>(rows, vector<bool>(cols, false));
-    queue<pair<int,int>>q;
+    queue<pair<int,int>> q;
     bool touches_border = false;
 
     for (auto r = 0; r < rows; ++r) {
         for (auto c = 0; c < cols; ++c) {
             if (picture[r][c] != region_code) continue;
-            auto ncoords = array<pair<int,int>, 4>{
-                pair{r-1,c}, pair{r+1,c}, pair{r,c-1}, pair{r,c+1}
-            };
+            array<pair<int,int>,4> ncoords{ pair{r-1,c}, pair{r+1,c}, pair{r,c-1}, pair{r,c+1} };
             for (auto [nr,nc] : ncoords) {
                 if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) {
-                    // region touches boundary via direct adjacency maybe impossible for inner region
                     touches_border = true;
                     continue;
                 }
-                if (picture[nr][nc] != 0) continue; // only traverse light area
+                if (picture[nr][nc] != 0) continue;
                 if (seen[nr][nc]) continue;
                 seen[nr][nc] = true;
                 q.push({nr,nc});
@@ -71,12 +69,10 @@ auto is_enclosed_region(int region_code) -> bool {
 
     while (!q.empty()) {
         auto [r,c] = q.front(); q.pop();
-        if (r == 0 || r == rows-1 || c == 0 || c == cols-1) {
+        if (r == 0 || r == rows - 1 || c == 0 || c == cols - 1) {
             return false;
         }
-        auto ncoords = array<pair<int,int>, 4>{
-            pair{r-1,c}, pair{r+1,c}, pair{r,c-1}, pair{r,c+1}
-        };
+        array<pair<int,int>,4> ncoords{ pair{r-1,c}, pair{r+1,c}, pair{r,c-1}, pair{r,c+1} };
         for (auto [nr,nc] : ncoords) {
             if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
             if (seen[nr][nc]) continue;
@@ -99,7 +95,7 @@ int main() {
     for (auto r = 0; r < rows; ++r) {
         auto line = string();
         getline(cin, line);
-        for (auto c = 0; c < cols && c < (int)line.size(); ++c) {
+        for (auto c = 0; c < cols && c < static_cast<int>(line.size()); ++c) {
             picture[r][c] = (line[c] == '*' ? 1 : 0);
         }
     }
@@ -147,7 +143,7 @@ int main() {
         for (auto r = 0; r < rows; ++r) {
             for (auto c = 0; c < cols; ++c) {
                 auto rid = picture[r][c] - 1000;
-                if (rid > 0 && rid <= (int)region_sizes.size()) {
+                if (rid > 0 && rid <= static_cast<int>(region_sizes.size())) {
                     auto sz = region_sizes[rid - 1];
                     if (infinity ? sz > lo : (sz >= lo && sz <= hi)) {
                         cout << '*';
@@ -168,7 +164,7 @@ int main() {
 
     cout << "Part 4: Regions totally surrounded by another dark region:\n";
     auto surrounded_region_ids = vector<int>();
-    for (auto idx = 0; idx < (int)region_sizes.size(); ++idx) {
+    for (auto idx = 0; idx < static_cast<int>(region_sizes.size()); ++idx) {
         if (edge_regions[idx]) continue;
         auto region_code = idx + 1 + 1000;
         if (is_enclosed_region(region_code)) {
