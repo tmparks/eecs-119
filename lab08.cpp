@@ -1,349 +1,430 @@
-//* Write a C++ program for the instructions in the file lab08.md
+#include <array>
+#include <algorithm>  // added for std::min, std::copy_n
+#include <cctype>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include <bits/stdc++.h>
-using namespace std;
-
-const int MAX_STUDENTS = 100;
-const int MAX_ASSIGNMENTS = 10;
-const int MAX_STUDENT_NAME = 30;
-const int MAX_ASSIGN_NAME = 6;
+constexpr std::size_t kMaxStudents = 100;
+constexpr std::size_t kMaxAssignments = 10;
+constexpr std::size_t kMaxStudentName = 30;
+constexpr std::size_t kMaxAssignmentName = 6;
 
 struct Student {
-    string name;
-    int scores[MAX_ASSIGNMENTS];
+    std::string name;
+    std::array<int, kMaxAssignments> scores{};
 };
 
-vector<string> asgn_names;
-vector<Student> students;
-bool session_started = false;
+struct Database {
+    std::vector<std::string> assignment_names;
+    std::vector<Student> students;
+    bool started = false;
+};
 
-string trim(const string& s) {
-    size_t a = s.find_first_not_of(" \t\r\n");
-    if (a == string::npos) return "";
-    size_t b = s.find_last_not_of(" \t\r\n");
-    return s.substr(a, b - a + 1);
+static std::string trim(std::string_view s) {
+    const auto first = s.find_first_not_of(" \t\r\n");
+    if (first == std::string_view::npos) {
+        return {};
+    }
+    const auto last = s.find_last_not_of(" \t\r\n");
+    return std::string(s.substr(first, last - first + 1));
 }
 
-string to_upper(const string& s) {
-    string out = s;
-    for (char& c : out) c = toupper((unsigned char)c);
-    return out;
+static std::string to_upper(std::string_view s) {
+    std::string result;
+    result.reserve(s.size());
+    for (char c : s) {
+        result.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
+    }
+    return result;
 }
 
-bool student_exists(const string& name) {
-    for (auto& st : students)
-        if (to_upper(st.name) == to_upper(name))
+static bool student_exists(Database const& db, std::string_view name) {
+    const auto target = to_upper(name);
+    for (auto const& st : db.students) {
+        if (to_upper(st.name) == target) {
             return true;
+        }
+    }
     return false;
 }
 
-int student_index(const string& name) {
-    for (int i = 0; i < (int)students.size(); i++)
-        if (to_upper(students[i].name) == to_upper(name))
+static std::size_t find_student(Database const& db, std::string_view name) {
+    const auto target = to_upper(name);
+    for (std::size_t i = 0; i < db.students.size(); ++i) {
+        if (to_upper(db.students[i].name) == target) {
             return i;
-    return -1;
+        }
+    }
+    return db.students.size();
 }
 
-bool assignment_exists(const string& name) {
-    for (auto& as : asgn_names)
-        if (to_upper(as) == to_upper(name))
+static bool assignment_exists(Database const& db, std::string_view name) {
+    const auto target = to_upper(name);
+    for (auto const& an : db.assignment_names) {
+        if (to_upper(an) == target) {
             return true;
+        }
+    }
     return false;
 }
 
-int assignment_index(const string& name) {
-    for (int i = 0; i < (int)asgn_names.size(); i++)
-        if (to_upper(asgn_names[i]) == to_upper(name))
+static std::size_t find_assignment(Database const& db, std::string_view name) {
+    const auto target = to_upper(name);
+    for (std::size_t i = 0; i < db.assignment_names.size(); ++i) {
+        if (to_upper(db.assignment_names[i]) == target) {
             return i;
-    return -1;
+        }
+    }
+    return db.assignment_names.size();
 }
 
-string name_input(const string& prompt, int limit) {
+static std::string prompt_name(std::string const& prompt, std::size_t limit) {
     while (true) {
-        cout << prompt;
-        cout.flush();
-        string line;
-        if (!getline(cin, line)) return "";
-        istringstream iss(line);
-        string w;
-        if (!(iss >> w)) continue;
-        if ((int)w.size() > limit)
-            w = w.substr(0, limit);
-        return w;
+        std::cout << prompt;
+        std::cout.flush();
+
+        std::string line;
+        if (!std::getline(std::cin, line)) {
+            return {};
+        }
+        std::istringstream iss(line);
+        std::string token;
+        if (!(iss >> token)) {
+            continue;
+        }
+        if (token.size() > limit) {
+            token.resize(limit);
+        }
+        return token;
     }
 }
 
-int int_input(const string& prompt) {
+static int prompt_int(std::string const& prompt) {
     while (true) {
-        cout << prompt;
-        cout.flush();
-        string line;
-        if (!getline(cin, line)) continue;
-        istringstream iss(line);
-        int v;
-        if (iss >> v) return v;
-        cout << "Bad integer, try again.\n";
+        std::cout << prompt;
+        std::cout.flush();
+
+        std::string line;
+        if (!std::getline(std::cin, line)) {
+            continue;
+        }
+        std::istringstream iss(line);
+        int value = 0;
+        if (iss >> value) {
+            return value;
+        }
+        std::cout << "Bad integer, try again.\n";
     }
 }
 
-void cmd_new() {
-    students.clear();
-    asgn_names.clear();
-    session_started = true;
-    cout << "NEW: Enter student names, one per line, 'END' to finish.\n";
-    while (true) {
-        if ((int)students.size() >= MAX_STUDENTS) {
-            cout << "Reached maximum number of students (" << MAX_STUDENTS << ").\n";
+static void command_new(Database& db) {
+    db.assignment_names.clear();
+    db.students.clear();
+    db.started = true;
+
+    std::cout << "NEW: enter student names one per line, END to finish\n";
+    while (db.students.size() < kMaxStudents) {
+        auto name = prompt_name("Student name: ", kMaxStudentName);
+        if (to_upper(name) == "END") {
             break;
         }
-        string name = name_input("Student name: ", MAX_STUDENT_NAME);
-        if (to_upper(name) == "END") break;
-        if (name.empty()) continue;
-        if (student_exists(name)) {
-            cout << "Duplicate student name. Try again.\n";
+        if (name.empty()) {
+            continue;
+        }
+        if (student_exists(db, name)) {
+            std::cout << "Duplicate student name.\n";
             continue;
         }
         Student st;
-        st.name = name;
-        for (int i = 0; i < MAX_ASSIGNMENTS; i++) st.scores[i] = 0;
-        students.push_back(st);
+        st.name = std::move(name);
+        db.students.push_back(std::move(st));
     }
-    cout << "NEW complete. " << students.size() << " students.\n";
+    if (db.students.size() >= kMaxStudents) {
+        std::cout << "Reached maximum number of students.\n";
+    }
 }
 
-void cmd_edit() {
-    ifstream f("recdata", ios::binary);
-    if (!f) {
-        cout << "EDIT: cannot open recdata file.\n";
+static void command_edit(Database& db) {
+    std::ifstream file("recdata", std::ios::binary);
+    if (!file) {
+        std::cout << "EDIT: cannot open recdata\n";
         return;
     }
-    int16_t nst, nasgn;
-    f.read((char*)&nst, sizeof(nst));
-    f.read((char*)&nasgn, sizeof(nasgn));
-    if (!f || nst < 0 || nst > MAX_STUDENTS || nasgn < 0 || nasgn > MAX_ASSIGNMENTS) {
-        cout << "EDIT: recdata corrupted or invalid.\n";
+
+    int16_t n_students = 0;
+    int16_t n_assignments = 0;
+
+    file.read(reinterpret_cast<char*>(&n_students), sizeof(n_students));
+    file.read(reinterpret_cast<char*>(&n_assignments), sizeof(n_assignments));
+
+    if (!file || n_students < 0 || n_students > static_cast<int16_t>(kMaxStudents) ||
+        n_assignments < 0 || n_assignments > static_cast<int16_t>(kMaxAssignments)) {
+        std::cout << "EDIT: corrupted recdata\n";
         return;
     }
-    students.clear();
-    asgn_names.clear();
-    for (int i = 0; i < nasgn; i++) {
-        char an[MAX_ASSIGN_NAME];
-        f.read(an, MAX_ASSIGN_NAME);
-        string s(an, MAX_ASSIGN_NAME);
-        while (!s.empty() && s.back() == ' ') s.pop_back();
-        asgn_names.push_back(s);
-    }
-    for (int i = 0; i < nst; i++) {
-        char nm[MAX_STUDENT_NAME];
-        f.read(nm, MAX_STUDENT_NAME);
-        Student st;
-        st.name = string(nm, MAX_STUDENT_NAME);
-        while (!st.name.empty() && st.name.back() == ' ') st.name.pop_back();
-        for (int j = 0; j < MAX_ASSIGNMENTS; j++) {
-            int32_t sc;
-            f.read((char*)&sc, sizeof(sc));
-            st.scores[j] = sc;
+
+    db.assignment_names.clear();
+    db.students.clear();
+
+    for (int i = 0; i < n_assignments; ++i) {
+        std::array<char, kMaxAssignmentName> buffer{};
+        file.read(buffer.data(), buffer.size());
+        std::string name(buffer.data(), buffer.size());
+        while (!name.empty() && name.back() == ' ') {
+            name.pop_back();
         }
-        students.push_back(st);
+        db.assignment_names.push_back(std::move(name));
     }
-    if (!f.good() && !f.eof()) {
-        cout << "EDIT: error reading recdata.\n";
+
+    for (int i = 0; i < n_students; ++i) {
+        std::array<char, kMaxStudentName> buffer{};
+        file.read(buffer.data(), buffer.size());
+        std::string name(buffer.data(), buffer.size());
+        while (!name.empty() && name.back() == ' ') {
+            name.pop_back();
+        }
+        Student st;
+        st.name = std::move(name);
+        for (std::size_t j = 0; j < kMaxAssignments; ++j) {
+            int32_t score = 0;
+            file.read(reinterpret_cast<char*>(&score), sizeof(score));
+            st.scores[j] = score;
+        }
+        db.students.push_back(std::move(st));
+    }
+
+    if (!file.good() && !file.eof()) {
+        std::cout << "EDIT: read error\n";
         return;
     }
-    session_started = true;
-    cout << "EDIT complete. " << students.size() << " students, "
-         << asgn_names.size() << " assignments.\n";
+
+    db.started = true;
 }
 
-void cmd_update() {
-    if ((int)asgn_names.size() >= MAX_ASSIGNMENTS) {
-        cout << "Maximum assignments reached.\n";
+static void command_update(Database& db) {
+    if (db.assignment_names.size() >= kMaxAssignments) {
+        std::cout << "Cannot add more assignments.\n";
         return;
     }
-    string name = name_input("Assignment name: ", MAX_ASSIGN_NAME);
-    if (name.empty()) { cout << "No assignment name provided.\n"; return; }
-    if (assignment_exists(name)) {
-        cout << "Duplicate assignment name; update aborted.\n";
+    auto name = prompt_name("Assignment name: ", kMaxAssignmentName);
+    if (name.empty()) {
         return;
     }
-    asgn_names.push_back(name);
-    int idx = asgn_names.size() - 1;
-    for (auto& st : students) {
-        int grade = int_input("Enter grade for " + st.name + ": ");
-        st.scores[idx] = grade;
+    if (assignment_exists(db, name)) {
+        std::cout << "Duplicate assignment name. UPDATE aborted.\n";
+        return;
     }
-    cout << "UPDATE complete.\n";
+
+    db.assignment_names.push_back(name);
+    const std::size_t assn_idx = db.assignment_names.size() - 1;
+
+    for (auto& student : db.students) {
+        const auto score = prompt_int("Score for " + student.name + ": ");
+        student.scores[assn_idx] = score;
+    }
 }
 
-void cmd_change() {
-    string item = name_input("Change student name, grade, or assignment? ", 20);
-    string upitem = to_upper(item);
-    if (upitem == "STUDENT" || upitem == "STUDENT NAME") {
-        string oldn = name_input("Current student name: ", MAX_STUDENT_NAME);
-        int idx = student_index(oldn);
-        if (idx < 0) { cout << "Student not found. CHANGE aborted.\n"; return; }
-        string newn = name_input("New student name: ", MAX_STUDENT_NAME);
-        if (newn.empty()) { cout << "No new name. CHANGE aborted.\n"; return; }
-        if (student_exists(newn)) { cout << "Duplicate name. CHANGE aborted.\n"; return; }
-        students[idx].name = newn;
-        cout << "Student name changed.\n";
-    } else if (upitem == "ASSIGNMENT" || upitem == "ASSIGNMENT NAME") {
-        string oldn = name_input("Current assignment name: ", MAX_ASSIGN_NAME);
-        int idx = assignment_index(oldn);
-        if (idx < 0) { cout << "Assignment not found. CHANGE aborted.\n"; return; }
-        string newn = name_input("New assignment name: ", MAX_ASSIGN_NAME);
-        if (newn.empty()) { cout << "No new name. CHANGE aborted.\n"; return; }
-        if (assignment_exists(newn)) { cout << "Duplicate assignment name. CHANGE aborted.\n"; return; }
-        asgn_names[idx] = newn;
-        cout << "Assignment name changed.\n";
-    } else if (upitem == "GRADE") {
-        string stn = name_input("Student name: ", MAX_STUDENT_NAME);
-        int si = student_index(stn);
-        if (si < 0) { cout << "Student not found. CHANGE aborted.\n"; return; }
-        string an = name_input("Assignment name: ", MAX_ASSIGN_NAME);
-        int ai = assignment_index(an);
-        if (ai < 0) { cout << "Assignment not found. CHANGE aborted.\n"; return; }
-        cout << "Current grade: " << students[si].scores[ai] << "\n";
-        int ng = int_input("New grade: ");
-        students[si].scores[ai] = ng;
-        cout << "Grade changed.\n";
+static void command_change(Database& db) {
+    auto item = prompt_name("Change (student, assignment, grade): ", 20);
+    const auto item_u = to_upper(item);
+
+    if (item_u.find("STUDENT") != std::string::npos) {
+        auto old_name = prompt_name("Current student name: ", kMaxStudentName);
+        const auto idx = find_student(db, old_name);
+        if (idx == db.students.size()) {
+            std::cout << "Student not found.\n";
+            return;
+        }
+        auto new_name = prompt_name("New student name: ", kMaxStudentName);
+        if (new_name.empty() || student_exists(db, new_name)) {
+            std::cout << "Invalid new name.\n";
+            return;
+        }
+        db.students[idx].name = std::move(new_name);
+    } else if (item_u.find("ASSIGNMENT") != std::string::npos) {
+        auto old_name = prompt_name("Current assignment name: ", kMaxAssignmentName);
+        const auto idx = find_assignment(db, old_name);
+        if (idx == db.assignment_names.size()) {
+            std::cout << "Assignment not found.\n";
+            return;
+        }
+        auto new_name = prompt_name("New assignment name: ", kMaxAssignmentName);
+        if (new_name.empty() || assignment_exists(db, new_name)) {
+            std::cout << "Invalid new name.\n";
+            return;
+        }
+        db.assignment_names[idx] = std::move(new_name);
+    } else if (item_u.find("GRADE") != std::string::npos) {
+        auto student_name = prompt_name("Student name: ", kMaxStudentName);
+        const auto sidx = find_student(db, student_name);
+        if (sidx == db.students.size()) {
+            std::cout << "Student not found.\n";
+            return;
+        }
+        auto assignment_name = prompt_name("Assignment name: ", kMaxAssignmentName);
+        const auto aidx = find_assignment(db, assignment_name);
+        if (aidx == db.assignment_names.size()) {
+            std::cout << "Assignment not found.\n";
+            return;
+        }
+        std::cout << "Current grade: " << db.students[sidx].scores[aidx] << "\n";
+        db.students[sidx].scores[aidx] = prompt_int("New grade: ");
     } else {
-        cout << "Unknown CHANGE item. Aborted.\n";
+        std::cout << "Unknown change item.\n";
     }
 }
 
-void cmd_type(ostream& out) {
-    out << "Number of students: " << students.size() << "\n";
-    out << "Number of assignments: " << asgn_names.size() << "\n";
-    out << "Assignments:";
-    for (auto& a: asgn_names) out << " " << a;
+static void command_type(Database const& db, std::ostream& out) {
+    out << "Students: " << db.students.size() << "\n";
+    out << "Assignments: " << db.assignment_names.size() << "\n";
+    out << "Assignment names:";
+    for (auto const& name : db.assignment_names) {
+        out << " " << name;
+    }
     out << "\n";
-    out << "----------------------------------------\n";
-    for (auto& st : students) {
-        out << st.name;
-        for (int j = 0; j < (int)asgn_names.size(); j++) {
-            out << " " << st.scores[j];
+
+    for (auto const& student : db.students) {
+        out << student.name;
+        for (std::size_t j = 0; j < db.assignment_names.size(); ++j) {
+            out << " " << student.scores[j];
         }
         out << "\n";
     }
 }
 
-void cmd_list() {
-    ofstream out("chardata");
+static void command_list(Database const& db) {
+    std::ofstream out("chardata");
     if (!out) {
-        cout << "Could not open chardata for LIST.\n";
+        std::cout << "LIST: cannot open chardata\n";
         return;
     }
-    cmd_type(out);
-    cout << "LIST output written to chardata.\n";
+    command_type(db, out);
+    std::cout << "LIST written to chardata\n";
 }
 
-void cmd_save() {
-    ofstream f("recdata", ios::binary | ios::trunc);
-    if (!f) { cout << "Could not open recdata for SAVE.\n"; return; }
-    int16_t nst = (int16_t)students.size();
-    int16_t nasgn = (int16_t)asgn_names.size();
-    f.write((char*)&nst, sizeof(nst));
-    f.write((char*)&nasgn, sizeof(nasgn));
-    for (int i = 0; i < nasgn; i++) {
-        char an[MAX_ASSIGN_NAME];
-        memset(an, ' ', sizeof(an));
-        string s = asgn_names[i];
-        memcpy(an, s.c_str(), min((size_t)MAX_ASSIGN_NAME, s.size()));
-        f.write(an, sizeof(an));
+static void command_save(Database const& db) {
+    std::ofstream file("recdata", std::ios::binary | std::ios::trunc);
+    if (!file) {
+        std::cout << "SAVE: cannot open recdata\n";
+        return;
     }
-    for (int i = 0; i < nst; i++) {
-        char nm[MAX_STUDENT_NAME];
-        memset(nm, ' ', sizeof(nm));
-        string s = students[i].name;
-        memcpy(nm, s.c_str(), min((size_t)MAX_STUDENT_NAME, s.size()));
-        f.write(nm, sizeof(nm));
-        for (int j = 0; j < MAX_ASSIGNMENTS; j++) {
-            int32_t sc = students[i].scores[j];
-            f.write((char*)&sc, sizeof(sc));
+
+    const int16_t n_students = static_cast<int16_t>(db.students.size());
+    const int16_t n_assignments = static_cast<int16_t>(db.assignment_names.size());
+    file.write(reinterpret_cast<const char*>(&n_students), sizeof(n_students));
+    file.write(reinterpret_cast<const char*>(&n_assignments), sizeof(n_assignments));
+
+    for (auto const& asgn : db.assignment_names) {
+        std::array<char, kMaxAssignmentName> buffer;
+        buffer.fill(' ');
+        std::copy_n(asgn.data(), std::min(asgn.size(), kMaxAssignmentName), buffer.data());
+        file.write(buffer.data(), buffer.size());
+    }
+
+    for (auto const& student : db.students) {
+        std::array<char, kMaxStudentName> buffer;
+        buffer.fill(' ');
+        std::copy_n(student.name.data(), std::min(student.name.size(), kMaxStudentName), buffer.data());
+        file.write(buffer.data(), buffer.size());
+        for (auto score : student.scores) {
+            const int32_t sc32 = static_cast<int32_t>(score);
+            file.write(reinterpret_cast<const char*>(&sc32), sizeof(sc32));
         }
     }
-    if (!f.good()) {
-        cout << "Error writing recdata.\n";
-        return;
+
+    if (!file.good()) {
+        std::cout << "SAVE: write failed\n";
     }
-    cout << "SAVE complete.\n";
 }
 
-void cmd_help(const string& arg) {
-    map<string, string> helpText {
-        {"NEW", "NEW: create new database (students)."},
-        {"EDIT", "EDIT: load database from recdata file."},
-        {"UPDATE", "UPDATE: new assignment + grades for each student."},
-        {"CHANGE", "CHANGE: modify student name, assignment name, or grade."},
-        {"SAVE", "SAVE: write database to recdata file."},
-        {"TYPE", "TYPE: show current database to screen."},
-        {"LIST", "LIST: write current database to chardata file."},
-        {"HELP", "HELP: show commands help."},
-        {"QUIT", "QUIT: exit, ask to SAVE first."}
+static void command_help(std::string_view arg) {
+    static const std::map<std::string, std::string> help_text = {
+        {"NEW", "NEW - build a new database."},
+        {"EDIT", "EDIT - load database from recdata."},
+        {"UPDATE", "UPDATE - add assignment and grades."},
+        {"CHANGE", "CHANGE - modify student/assignment/grade."},
+        {"SAVE", "SAVE - persist database to recdata."},
+        {"TYPE", "TYPE - display database on screen."},
+        {"LIST", "LIST - write database to chardata."},
+        {"HELP", "HELP - show this message."},
+        {"QUIT", "QUIT - exit program."},
     };
+
     if (arg.empty()) {
-        cout << "Available commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
-        cout << "Type 'HELP <command>' for a two-line explanation.\n";
+        std::cout << "Commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
+        std::cout << "Use HELP <command> for details.\n";
         return;
     }
-    string uarg = to_upper(arg);
-    if (helpText.count(uarg) == 0) {
-        cout << "Available commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
-        cout << "Type 'HELP <command>' for a two-line explanation.\n";
+
+    const auto key = to_upper(arg);
+    auto it = help_text.find(key);
+    if (it == help_text.end()) {
+        std::cout << "Commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
+        std::cout << "Use HELP <command> for details.\n";
         return;
     }
-    cout << helpText[uarg] << "\n";
-    cout << "Usage: " << uarg << " ... (see assignment spec) \n";
+
+    std::cout << it->second << "\n";
+    std::cout << "Usage: " << key << " ...\n";
 }
 
 int main() {
-    cout << "type 'HELP' help for instructions\n";
-    string line;
-    while (true) {
-        cout << "\nCommand: ";
-        cout.flush();
-        if (!getline(cin, line)) break;
-        line = trim(line);
-        if (line.empty()) continue;
-        istringstream iss(line);
-        string cmd;
-        iss >> cmd;
-        if (cmd.empty()) continue;
-        string arg;
-        iss >> arg;
-        string ucmd = to_upper(cmd);
+    Database db;
+    std::cout << "type 'HELP' help for instructions\n";
 
-        if (!session_started && ucmd != "NEW" && ucmd != "EDIT" && ucmd != "HELP") {
-            cout << "Session not started. Use NEW or EDIT first.\n";
+    for (std::string line; std::cout << "\nCommand: ", std::getline(std::cin, line);) {
+        const auto trimmed = trim(line);
+        if (trimmed.empty()) {
+            continue;
+        }
+
+        std::istringstream iss(trimmed);
+        std::string command;
+        iss >> command;
+        if (command.empty()) {
+            continue;
+        }
+        std::string arg;
+        iss >> arg;
+
+        const auto ucmd = to_upper(command);
+        if (!db.started && ucmd != "NEW" && ucmd != "EDIT" && ucmd != "HELP") {
+            std::cout << "Session not started. Use NEW or EDIT first.\n";
             continue;
         }
 
         if (ucmd == "NEW") {
-            cmd_new();
+            command_new(db);
         } else if (ucmd == "EDIT") {
-            cmd_edit();
+            command_edit(db);
         } else if (ucmd == "UPDATE") {
-            cmd_update();
+            command_update(db);
         } else if (ucmd == "CHANGE") {
-            cmd_change();
+            command_change(db);
         } else if (ucmd == "SAVE") {
-            cmd_save();
+            command_save(db);
         } else if (ucmd == "TYPE") {
-            cmd_type(cout);
+            command_type(db, std::cout);
         } else if (ucmd == "LIST") {
-            cmd_list();
+            command_list(db);
         } else if (ucmd == "HELP") {
-            cmd_help(arg);
+            command_help(arg);
         } else if (ucmd == "QUIT") {
-            string ans = name_input("Do you want to SAVE before quitting? (yes/no): ", 10);
-            string uans = to_upper(ans);
-            if (uans == "Y" || uans == "YES") cmd_save();
-            cout << "Goodbye.\n";
+            const auto answer = prompt_name("Save before quitting? (yes/no): ", 4);
+            const auto ans_u = to_upper(answer);
+            if (ans_u == "YES" || ans_u == "Y") {
+                command_save(db);
+            }
             break;
         } else {
-            cout << "Illegal command: " << cmd << ".\n";
+            std::cout << "Illegal command.\n";
         }
     }
+
     return 0;
 }
