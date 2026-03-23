@@ -1,12 +1,14 @@
+#include <algorithm>
 #include <array>
-#include <algorithm>  // added for std::min, std::copy_n
 #include <cctype>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 constexpr std::size_t kMaxStudents = 100;
@@ -26,61 +28,57 @@ struct Database {
 };
 
 static std::string trim(std::string_view s) {
-    const auto first = s.find_first_not_of(" \t\r\n");
+    auto first = s.find_first_not_of(" \t\r\n");
     if (first == std::string_view::npos) {
         return {};
     }
-    const auto last = s.find_last_not_of(" \t\r\n");
-    return std::string(s.substr(first, last - first + 1));
+    auto last = s.find_last_not_of(" \t\r\n");
+    return std::string{s.substr(first, last - first + 1)};
 }
 
 static std::string to_upper(std::string_view s) {
     std::string result;
     result.reserve(s.size());
-    for (char c : s) {
-        result.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(c))));
-    }
+    std::ranges::transform(s, std::back_inserter(result), [](unsigned char c) {
+        return static_cast<char>(std::toupper(c));
+    });
     return result;
 }
 
 static bool student_exists(Database const& db, std::string_view name) {
     const auto target = to_upper(name);
-    for (auto const& st : db.students) {
-        if (to_upper(st.name) == target) {
-            return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(db.students, [&](auto const& st) {
+        return to_upper(st.name) == target;
+    });
 }
 
 static std::size_t find_student(Database const& db, std::string_view name) {
     const auto target = to_upper(name);
-    for (std::size_t i = 0; i < db.students.size(); ++i) {
-        if (to_upper(db.students[i].name) == target) {
-            return i;
-        }
+    auto it = std::ranges::find_if(db.students, [&](auto const& st) {
+        return to_upper(st.name) == target;
+    });
+    if (it == db.students.end()) {
+        return db.students.size();
     }
-    return db.students.size();
+    return std::distance(db.students.begin(), it);
 }
 
 static bool assignment_exists(Database const& db, std::string_view name) {
     const auto target = to_upper(name);
-    for (auto const& an : db.assignment_names) {
-        if (to_upper(an) == target) {
-            return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(db.assignment_names, [&](auto const& an) {
+        return to_upper(an) == target;
+    });
 }
 
 static std::size_t find_assignment(Database const& db, std::string_view name) {
     const auto target = to_upper(name);
-    for (std::size_t i = 0; i < db.assignment_names.size(); ++i) {
-        if (to_upper(db.assignment_names[i]) == target) {
-            return i;
-        }
+    auto it = std::ranges::find_if(db.assignment_names, [&](auto const& an) {
+        return to_upper(an) == target;
+    });
+    if (it == db.assignment_names.end()) {
+        return db.assignment_names.size();
     }
-    return db.assignment_names.size();
+    return std::distance(db.assignment_names.begin(), it);
 }
 
 static std::string prompt_name(std::string const& prompt, std::size_t limit) {
@@ -92,14 +90,17 @@ static std::string prompt_name(std::string const& prompt, std::size_t limit) {
         if (!std::getline(std::cin, line)) {
             return {};
         }
+
         std::istringstream iss(line);
         std::string token;
         if (!(iss >> token)) {
             continue;
         }
+
         if (token.size() > limit) {
             token.resize(limit);
         }
+
         return token;
     }
 }
@@ -113,11 +114,13 @@ static int prompt_int(std::string const& prompt) {
         if (!std::getline(std::cin, line)) {
             continue;
         }
+
         std::istringstream iss(line);
         int value = 0;
         if (iss >> value) {
             return value;
         }
+
         std::cout << "Bad integer, try again.\n";
     }
 }
@@ -140,10 +143,9 @@ static void command_new(Database& db) {
             std::cout << "Duplicate student name.\n";
             continue;
         }
-        Student st;
-        st.name = std::move(name);
-        db.students.push_back(std::move(st));
+        db.students.push_back(Student{std::move(name), {}});
     }
+
     if (db.students.size() >= kMaxStudents) {
         std::cout << "Reached maximum number of students.\n";
     }
@@ -158,7 +160,6 @@ static void command_edit(Database& db) {
 
     int16_t n_students = 0;
     int16_t n_assignments = 0;
-
     file.read(reinterpret_cast<char*>(&n_students), sizeof(n_students));
     file.read(reinterpret_cast<char*>(&n_assignments), sizeof(n_assignments));
 
@@ -174,7 +175,7 @@ static void command_edit(Database& db) {
     for (int i = 0; i < n_assignments; ++i) {
         std::array<char, kMaxAssignmentName> buffer{};
         file.read(buffer.data(), buffer.size());
-        std::string name(buffer.data(), buffer.size());
+        std::string name{buffer.data(), buffer.size()};
         while (!name.empty() && name.back() == ' ') {
             name.pop_back();
         }
@@ -184,17 +185,20 @@ static void command_edit(Database& db) {
     for (int i = 0; i < n_students; ++i) {
         std::array<char, kMaxStudentName> buffer{};
         file.read(buffer.data(), buffer.size());
-        std::string name(buffer.data(), buffer.size());
+        std::string name{buffer.data(), buffer.size()};
         while (!name.empty() && name.back() == ' ') {
             name.pop_back();
         }
+
         Student st;
         st.name = std::move(name);
+
         for (std::size_t j = 0; j < kMaxAssignments; ++j) {
             int32_t score = 0;
             file.read(reinterpret_cast<char*>(&score), sizeof(score));
             st.scores[j] = score;
         }
+
         db.students.push_back(std::move(st));
     }
 
@@ -211,21 +215,22 @@ static void command_update(Database& db) {
         std::cout << "Cannot add more assignments.\n";
         return;
     }
+
     auto name = prompt_name("Assignment name: ", kMaxAssignmentName);
     if (name.empty()) {
         return;
     }
+
     if (assignment_exists(db, name)) {
         std::cout << "Duplicate assignment name. UPDATE aborted.\n";
         return;
     }
 
     db.assignment_names.push_back(name);
-    const std::size_t assn_idx = db.assignment_names.size() - 1;
+    const auto assn_idx = db.assignment_names.size() - 1;
 
     for (auto& student : db.students) {
-        const auto score = prompt_int("Score for " + student.name + ": ");
-        student.scores[assn_idx] = score;
+        student.scores[assn_idx] = prompt_int("Score for " + student.name + ": ");
     }
 }
 
@@ -246,6 +251,7 @@ static void command_change(Database& db) {
             return;
         }
         db.students[idx].name = std::move(new_name);
+
     } else if (item_u.find("ASSIGNMENT") != std::string::npos) {
         auto old_name = prompt_name("Current assignment name: ", kMaxAssignmentName);
         const auto idx = find_assignment(db, old_name);
@@ -259,6 +265,7 @@ static void command_change(Database& db) {
             return;
         }
         db.assignment_names[idx] = std::move(new_name);
+
     } else if (item_u.find("GRADE") != std::string::npos) {
         auto student_name = prompt_name("Student name: ", kMaxStudentName);
         const auto sidx = find_student(db, student_name);
@@ -266,14 +273,17 @@ static void command_change(Database& db) {
             std::cout << "Student not found.\n";
             return;
         }
+
         auto assignment_name = prompt_name("Assignment name: ", kMaxAssignmentName);
         const auto aidx = find_assignment(db, assignment_name);
         if (aidx == db.assignment_names.size()) {
             std::cout << "Assignment not found.\n";
             return;
         }
+
         std::cout << "Current grade: " << db.students[sidx].scores[aidx] << "\n";
         db.students[sidx].scores[aidx] = prompt_int("New grade: ");
+
     } else {
         std::cout << "Unknown change item.\n";
     }
@@ -316,6 +326,7 @@ static void command_save(Database const& db) {
 
     const int16_t n_students = static_cast<int16_t>(db.students.size());
     const int16_t n_assignments = static_cast<int16_t>(db.assignment_names.size());
+
     file.write(reinterpret_cast<const char*>(&n_students), sizeof(n_students));
     file.write(reinterpret_cast<const char*>(&n_assignments), sizeof(n_assignments));
 
@@ -331,6 +342,7 @@ static void command_save(Database const& db) {
         buffer.fill(' ');
         std::copy_n(student.name.data(), std::min(student.name.size(), kMaxStudentName), buffer.data());
         file.write(buffer.data(), buffer.size());
+
         for (auto score : student.scores) {
             const int32_t sc32 = static_cast<int32_t>(score);
             file.write(reinterpret_cast<const char*>(&sc32), sizeof(sc32));
@@ -362,15 +374,14 @@ static void command_help(std::string_view arg) {
     }
 
     const auto key = to_upper(arg);
-    auto it = help_text.find(key);
-    if (it == help_text.end()) {
-        std::cout << "Commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
-        std::cout << "Use HELP <command> for details.\n";
+    if (auto it = help_text.find(key); it != help_text.end()) {
+        std::cout << it->second << "\n";
+        std::cout << "Usage: " << key << " ...\n";
         return;
     }
 
-    std::cout << it->second << "\n";
-    std::cout << "Usage: " << key << " ...\n";
+    std::cout << "Commands: NEW EDIT UPDATE CHANGE SAVE TYPE LIST HELP QUIT\n";
+    std::cout << "Use HELP <command> for details.\n";
 }
 
 int main() {
