@@ -1,0 +1,19 @@
+---
+# [Using clang-tidy](https://clang.llvm.org/extra/clang-tidy/#using-clang-tidy)
+# [Clang-Tidy Checks](https://clang.llvm.org/extra/clang-tidy/checks/list.html)
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+
+Checks:
+  - -* # Disable default checks.
+  - cppcoreguidelines-*
+  - modernize-*
+# Disable some checks by choice.
+  - -cppcoreguidelines-avoid-magic-numbers
+  - -modernize-use-trailing-return-type
+
+CheckOptions:
+  modernize-use-auto.MinTypeNameLength: 0
+
+...

@@ -4,27 +4,27 @@ Bob
 Charlie
 END
 UPDATE
-Assignment 1
+Lab1
 100
 90
 80
 UPDATE
-Assignment 2
+Lab2
 100
 90
 80
 CHANGE
 ASSIGNMENT NAME
-Assignment 1
-Assignment One
+Lab1
+LabOne
 CHANGE
 STUDENT NAME
 Charlie
 Charles
 CHANGE
 GRADE
-Assignment One
 Charles
+LabOne
 95
 TYPE
 LIST

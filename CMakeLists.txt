@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.31) # Ubuntu 25.10 provides 3.31
 project(eecs-119 LANGUAGES CXX)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Required by clang-tidy
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CAMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(
     -Wall
     -Wextra
@@ -22,3 +24,8 @@ add_executable(lab06a lab06a.cpp)
 add_executable(lab06b lab06b.cpp)
 add_executable(lab06c lab06c.cpp)
 add_executable(lab07 lab07.cpp)
+add_executable(lab08 lab08.cpp)
+
+add_custom_target(
+    check COMMAND run-clang-tidy -quiet -p ${CMAKE_CURRENT_BINARY_DIR}
+)
