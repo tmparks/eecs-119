@@ -1,3 +1,13 @@
+//* Write a C++ program for the instructions in the file lab08.md
+
+//* Refactor the code in lab08.cpp to follow the guidelines in the file style-cpp.md
+
+//* Fix missing include directives in the file lab08.cpp
+
+//* Refactor the code in lab08.cpp to use features of C++20
+
+//* Fix the errors in the file lab08.cpp
+
 #include <algorithm>
 #include <array>
 #include <cctype>
