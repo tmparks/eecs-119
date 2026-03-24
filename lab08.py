@@ -112,18 +112,18 @@ class Database:
         """
         assert self.assignments, 'There are no assignments in the database'
         assert self.grades, 'There are no students in the database'
-        assignment = input('Assignment name? ').strip()
-        if assignment in self.assignments:
-            index = self.assignments.index(assignment)
-            student = input('Student name? ').strip()
-            if student in self.grades:
+        student = input('Student name? ').strip()
+        if student in self.grades:
+            assignment = input('Assignment name? ').strip()
+            if assignment in self.assignments:
+                index = self.assignments.index(assignment)
                 print('Current grade:', self.grades[student][index])
                 self.grades[student][index] = int(input('New grade? '))
                 self.modified = True
             else:
-                print('There is no student with the name', student)
+                print('There is no assignment with the name', assignment)
         else:
-            print('There is no assignment with the name', assignment)
+            print('There is no student with the name', student)
 
     def save(self, file_name):
         """
