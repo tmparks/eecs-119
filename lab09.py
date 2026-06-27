@@ -182,7 +182,7 @@ class Polygon:
         Find the vertex nearest to a point.
         Return the index of the nearest vertex.
         """
-        assert len(self._vertices) > 0, 'polygon is empty'
+        assert self._vertices, 'polygon is empty'
         nearest = 0
         min_distance = self._vertices[nearest].distance(point)
         for i in range(1, len(self._vertices)):
@@ -196,7 +196,7 @@ class Polygon:
         """
         Find the distance from a point to the nearest vertex.
         """
-        assert len(self._vertices) > 0, 'polygon is empty'
+        assert self._vertices, 'polygon is empty'
         return min(v.distance(point) for v in self._vertices)
 
     def edge_distance(self, point):
@@ -204,7 +204,7 @@ class Polygon:
         Find the distance from a point to the nearest edge.
         The distance is zero for points contained within the polygon.
         """
-        assert len(self._vertices) > 0, 'polygon is empty'
+        assert self._vertices, 'polygon is empty'
         self._init_edges()
         distance = 0.0
         if not self.contains(point):
@@ -256,7 +256,7 @@ class Scene:
         Find the polygon with the edge nearest to a point.
         Return the index of the nearest polygon.
         """
-        assert len(self.polygons) > 0, 'scene is empty'
+        assert self.polygons, 'scene is empty'
         nearest = 0
         min_distance = self.polygons[nearest].edge_distance(point)
         for i in range(1, len(self.polygons)):
@@ -271,7 +271,7 @@ class Scene:
         Find the polygon with the vertex nearest to a point.
         Return the index of the nearest polygon.
         """
-        assert len(self.polygons) > 0, 'scene is empty'
+        assert self.polygons, 'scene is empty'
         nearest = 0
         min_distance = self.polygons[nearest].vertex_distance(point)
         for i in range(1, len(self.polygons)):
@@ -316,6 +316,8 @@ def delete_polygon(scene, line):
     assert next(words) == 'D', 'invalid command'
     coordinates = (float(next(words)), float(next(words)))
     scene.delete_polygon(Point(coordinates))
+    if not scene.polygons:
+        print('warning: scene is empty')
 
 
 def delete_point(scene, line):
@@ -325,7 +327,13 @@ def delete_point(scene, line):
     words = iter(line.split())
     assert next(words) == 'd', 'invalid command'
     coordinates = (float(next(words)), float(next(words)))
+    before = len(scene.polygons)
     scene.delete_point(Point(coordinates))
+    after = len(scene.polygons)
+    if after < before:
+        print('warning: deleted polygon')
+        if after == 0:
+            print('warning: scene is empty')
 
 
 def find_polygon(scene, line):
@@ -366,7 +374,8 @@ def list_polygons(scene, line):
     assert next(words) == 'L', 'invalid command'
     word = next(words)
     if word == '*':
-        print('There are', len(scene.polygons), 'polygons')
+        print('There are', len(scene.polygons), 'polygons with sizes',
+              [len(p) for p in scene.polygons])
     else:
         size = int(word)
         print('There are', sum(int(len(p) == size) for p in scene.polygons),
@@ -379,8 +388,10 @@ def list_all_vertices(scene, line):
     """
     words = iter(line.split())
     assert next(words) == 'l', 'invalid command'
-    print('There are', sum(len(p) for p in scene.polygons), 'vertices')
-
+    print('There are', sum(len(p) for p in scene.polygons), 'vertices:')
+    for p in scene.polygons:
+        for v in iter(p):
+            print(v)
 
 def list_vertices(scene, line):
     """
