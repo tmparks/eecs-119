@@ -289,10 +289,9 @@ auto main() -> int {
                 }
             }
         } else if (cmd == "l") {
-            for (auto i = size_t{0}; i < scene.polygons.size(); ++i) {
-                std::cout << "Polygon " << i << ":\n";
-                for (const auto& pt : scene.polygons[i].points) {
-                    std::cout << "  (" << pt.x << ", " << pt.y << ")\n";
+            for (const auto& poly : scene.polygons) {
+                for (const auto& pt : poly.points) {
+                    std::cout << "(" << pt.x << ", " << pt.y << ")\n";
                 }
             }
         } else {
