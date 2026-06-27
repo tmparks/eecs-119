@@ -25,6 +25,7 @@ add_executable(lab06b lab06b.cpp)
 add_executable(lab06c lab06c.cpp)
 add_executable(lab07 lab07.cpp)
 add_executable(lab08 lab08.cpp)
+add_executable(lab09 lab09.cpp)
 
 add_custom_target(
     check COMMAND run-clang-tidy -quiet -p ${CMAKE_CURRENT_BINARY_DIR}
