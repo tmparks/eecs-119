@@ -1,3 +1,8 @@
+//* Write a C++20 program for the instructions in the file lab09.md
+//* and follow the guidelines in the file style-cpp.md
+
+//* Unlike the "C" command, the "l" command should not list polygons
+
 #include <iostream>
 #include <vector>
 #include <list>
