@@ -28,7 +28,7 @@ within your data structure to allow for insertion and deletion.
 You will be asked to consider two definitions of the distance from a point to a
 polygon during this assignment. In both, the distance between points is their
 Euclidian distance (i.e. distance from (x1,y1) to (x2,y2) is
-sqrt((x1-x2)^2 + (yl-y2)^2). The distance from a point to a whole line is
+sqrt((x1-x2)^2 + (yl-y2)^2)). The distance from a point to a whole line is
 defined as the perpendicular distance from the point to the line. The distance
 from a point to a line segment (i.e. edge of polygon) is defined as the
 perpendicular distance from the point to the whole line if the perpendicular
@@ -52,7 +52,7 @@ Your program should allow the user to execute the following commands:
 
 <dl>
 <dt>A n x1 y1 x2 y2 ... xn yn</dt>
-<dd>add a polygon of n points, the points being (x1,y 1),(x2,y2),....(xn,yn).</dd>
+<dd>add a polygon of n points, the points being (x1,y1),(x2,y2),....(xn,yn).</dd>
 <dt>D x1 y1</dt>
 <dd>delete the polygon closest to the point (x1,y1) (see F below). If this is
 the only polygon in the scene, your program should print a suitable warning
