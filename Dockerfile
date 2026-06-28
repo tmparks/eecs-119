@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install --yes \
         clang-tidy \
         cmake \
         git \
+        git-lfs \
         python3 \
         rust-all \
     && rm --recursive --force /var/lib/apt/lists/*
